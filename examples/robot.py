@@ -80,6 +80,8 @@ class MyBot(Wechaty):
                     fields={
                         'roomId': roomId,
                         'contactId': contactId,
+                        'operator': 1,
+                        'cmdName': text,
                         'licenseId': x[y]
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -98,7 +100,9 @@ class MyBot(Wechaty):
                     fields={
                         'roomId': roomId,
                         'contactId': contactId,
-                        'frameId': x[y]
+                        'operator': 1,
+                        'cmdName': text,
+                        'licenseId': x[y]
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )

@@ -1,0 +1,56 @@
+site_name: python-wechaty
+repo_url: http://github.com/wechaty/python-wechaty
+repo_name: GitHub
+site_description: 'python-wechaty AI Chatbot'
+copyright: '@wechaty community'
+nav:
+    - 首页: 'index.md'
+    - 介绍:
+      - '使用免费Web协议': 'introduction/use-web-protocol.md'
+      - '使用Padlocal协议': 'introduction/use-padlocal-protocol.md'
+      - '使用Paimon协议': 'introduction/use-paimon-protocol.md'
+      - '开始上手': 'introduction/getting-started.md'
+      - '相关视频': 'introduction/videos.md'
+    - 教程: tutorials.md
+    - 开箱即用:
+      - '如何添加好友': 'how-to/add-friendship.md'
+      - '关键字入群': 'how-to/create-room-inviter.md'
+    - 插件系统:
+      - '介绍': 'plugins/introduction.md'
+      - '关键字入群插件': 'plugins/keywords.md'
+      - '自动回复插件': 'plugins/auto-replay.md'
+      - '任务调度插件': 'plugins/scheduler.md'
+      - '群消息同步插件': 'plugins/message-forward.md'
+      - 'Rasa Connector 插件': 'plugins/rasa.md'
+      - 'Github Webhook 插件': 'plugins/github-webhook'
+      - 'Gitlab Webhook 插件': 'plugins/gitlab-webhook'
+    - 模块详解:
+      - '介绍': 'references/index.md'
+      - 'Wechaty模块': 'references/wechaty.md'
+      - '消息模块': 'references/message.md'
+      - '联系人模块': 'references/contact.md'
+      - '登录人模块': 'references/contact-self.md'
+      - '好友关系模块': 'references/friendship.md'
+      - '群聊模块': 'references/room.md'
+      - '群聊邀请模块': 'references/room-invitation.md'
+    - FAQ:
+      - '基础常见问题': 'faq/common.md'
+      - '什么是Puppet': 'faq/what-is-a-puppet.md'
+      
+    # - References: reference
+theme:
+  name: material
+  logo: img/wechaty-icon-white.svg
+  favicon: img/favicon.ico
+
+markdown_extensions:
+    - pymdownx.highlight
+    - pymdownx.superfences
+    - toc:
+        baselevel: 2
+google_analytics:
+  - G-1TDFTF2BYD
+  - auto
+
+plugins:
+    - search

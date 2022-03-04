@@ -10,6 +10,8 @@ from typing import List, Optional, Union
 
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+from wechaty_puppet import get_logger
+
 from src.wechaty import (
     MessageType,
     FileBox,
@@ -22,7 +24,6 @@ from src.wechaty import (
     FriendshipType,
     EventReadyPayload
 )
-from wechaty_puppet import get_logger
 
 logger = get_logger(__name__)
 
@@ -60,7 +61,7 @@ class MyBot(Wechaty):
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
             # for num in range(10,20):
-            await conversation.say('正在dong,请稍后')
+            await conversation.say('@' + msg.talker().name + '正在dong,请稍后')
             file_box = FileBox.from_url(
                 'http://img.v39pay.com/img/offlineFile/aa.pdf',
                 name='ding-dong.pdf')
@@ -80,7 +81,7 @@ class MyBot(Wechaty):
                     fields={
                         'roomId': roomId,
                         'contactId': contactId,
-                        'operator': 1,
+                        'operator': "1",
                         'cmdName': text,
                         'licenseId': x[y]
                     },
@@ -90,8 +91,8 @@ class MyBot(Wechaty):
                 response = requests.post(url, data=multipart_encoder, headers=headers)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say(res_dict['errorMsg'])
-
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                await conversation.say('@' + msg.talker().name + '获取保单成功')
             elif '车架号' in text:
                 x = text.split()
                 y = x.index('车架号') + 1
@@ -100,7 +101,7 @@ class MyBot(Wechaty):
                     fields={
                         'roomId': roomId,
                         'contactId': contactId,
-                        'operator': 1,
+                        'operator': "1",
                         'cmdName': text,
                         'licenseId': x[y]
                     },
@@ -110,8 +111,8 @@ class MyBot(Wechaty):
                 response = requests.post(url, data=multipart_encoder, headers=headers)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say(res_dict['errorMsg'])
-
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                await conversation.say('@' + msg.talker().name + '获取保单成功')
         elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
@@ -138,7 +139,8 @@ class MyBot(Wechaty):
             response = requests.post(url, data=multipart_encoder, headers=headers)
             res_dict = json.loads(response.text)
             if not res_dict['success']:
-                await conversation.say(res_dict['errorMsg'])
+                await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+            await conversation.say('@' + msg.talker().name + '上传图片成功')
             await msg.say(hd_file_box)
         # 保存到本地
         # await hd_file_box.to_file('/logs/robot/hd-image.jpg', overwrite=True)
@@ -309,7 +311,7 @@ async def main() -> None:
     bot = MyBot()
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.24.67.145:8788'
+    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.18.39.141:8788'
     await bot.start()
 
 

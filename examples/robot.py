@@ -56,6 +56,10 @@ class MyBot(Wechaty):
         roomId = room.room_id
         msg_type: MessageType = msg.type()
         file_box: Optional[FileBox] = None
+
+        # 主机
+        ip = 'http://192.168.1.196/'
+
         if '@壹加壹' in text and '保单' not in text:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
@@ -72,7 +76,7 @@ class MyBot(Wechaty):
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
             await conversation.say('正在查询保单信息,请稍后')
-            url = 'http://192.168.1.196/api/RobotApi/declaration.do'
+            url = ip + 'api/RobotApi/declaration.do'
             if '车牌号' in text:
                 x = text.split()
                 y = x.index('车牌号') + 1
@@ -120,11 +124,9 @@ class MyBot(Wechaty):
             logger.info('receving image file')
             # file_box: FileBox = await msg.to_file_box()
             image: Image = msg.to_image()
-
             hd_file_box: FileBox = await image.hd()
 
-            # 接口地址
-            url = 'http://192.168.1.196/api/RobotApi/imgUpload.do'
+            url = ip + 'api/RobotApi/imgUpload.do'
             multipart_encoder = MultipartEncoder(
                 fields={
                     'roomId': roomId,

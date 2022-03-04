@@ -61,11 +61,11 @@ class MyBot(Wechaty):
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
             # for num in range(10,20):
-            await conversation.say('@' + msg.talker().name + '正在dong,请稍后')
-            file_box = FileBox.from_url(
-                'http://img.v39pay.com/img/offlineFile/aa.pdf',
-                name='ding-dong.pdf')
-            await conversation.say(file_box)
+            await conversation.say('@' + msg.talker().name + '哎呀 别动')
+            # file_box = FileBox.from_url(
+            #     'http://img.v39pay.com/img/offlineFile/aa.pdf',
+            #     name='ding-dong.pdf')
+            # await conversation.say(file_box)
 
         elif '@壹加壹' in text and '保单' in text:
             conversation: Union[
@@ -140,7 +140,6 @@ class MyBot(Wechaty):
             res_dict = json.loads(response.text)
             if not res_dict['success']:
                 await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-            await conversation.say('@' + msg.talker().name + '上传图片成功')
             await msg.say(hd_file_box)
         # 保存到本地
         # await hd_file_box.to_file('/logs/robot/hd-image.jpg', overwrite=True)

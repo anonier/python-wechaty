@@ -194,7 +194,6 @@ class MyBot(Wechaty):
             logger.info('receving image file')
             image: Image = msg.to_image()
             hd_file_box: FileBox = await image.hd()
-
             url = ip + 'api/RobotApi/imgUpload.do'
             multipart_encoder = MultipartEncoder(
                 fields={
@@ -212,7 +211,6 @@ class MyBot(Wechaty):
             res_dict = json.loads(response.text)
             if not res_dict['success']:
                 await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-            await msg.say(hd_file_box)
 
         # 保存到本地
         # await hd_file_box.to_file('/logs/robot/hd-image.jpg', overwrite=True)

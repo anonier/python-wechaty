@@ -79,14 +79,49 @@ class MyBot(Wechaty):
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
-            # for num in range(10,20):
             await conversation.say('@' + msg.talker().name + ' 请输入指令!')
-            # file_box = FileBox.from_url(
-            #     'http://img.v39pay.com/img/offlineFile/aa.pdf',
-            #     name='ding-dong.pdf')
-            # await conversation.say(file_box)
 
         elif '@壹加壹' in text and '查单' in text:
+            conversation: Union[
+                Room, Contact] = from_contact if room is None else room
+            await conversation.ready()
+            url = ip + 'api/RobotApi/declaration.do'
+            x = text.split()
+            y = x.index('车牌号') + 1
+            try:
+                z = x[y]
+            except:
+                z = None
+            if z is None or len(z) == 0 or not_car_number(license_plate, z):
+                await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
+                return
+            await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
+            multipart_encoder = MultipartEncoder(
+                fields={
+                    'roomId': roomId,
+                    'contactId': contactId,
+                    'operator': "1",
+                    'cmdName': text,
+                    'licenseId': z,
+                    'appKey': "X08ASKYS"
+                },
+                boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+            )
+            headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+            response = requests.post(url, data=multipart_encoder, headers=headers)
+            res_dict = json.loads(response.text)
+            if not res_dict['success']:
+                await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                return
+            elif res_dict['success']:
+                await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
+                res_dict = json.loads(response.text)
+                file_box = FileBox.from_url(
+                    res_dict['url'],
+                    name=res_dict['fileName'])
+                await conversation.say(file_box)
+
+        elif '@壹加壹' in text and '报单' in text:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
@@ -151,6 +186,7 @@ class MyBot(Wechaty):
                     return
                 elif res_dict['success']:
                     await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
+
         elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
@@ -177,6 +213,7 @@ class MyBot(Wechaty):
             if not res_dict['success']:
                 await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
             await msg.say(hd_file_box)
+
         # 保存到本地
         # await hd_file_box.to_file('/logs/robot/hd-image.jpg', overwrite=True)
         # thumbnail_file_box: FileBox = await image.thumbnail()

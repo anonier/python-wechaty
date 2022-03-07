@@ -86,11 +86,10 @@ class MyBot(Wechaty):
             #     name='ding-dong.pdf')
             # await conversation.say(file_box)
 
-        elif '@壹加壹' in text and '保单' in text:
+        elif '@壹加壹' in text and '查单' in text:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
-            await conversation.say('正在查询保单信息,请稍后')
             url = ip + 'api/RobotApi/declaration.do'
             if '车牌号' in text:
                 x = text.split()

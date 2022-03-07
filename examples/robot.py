@@ -118,7 +118,8 @@ class MyBot(Wechaty):
                 response = requests.post(url, data=multipart_encoder, headers=headers)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                    await conversation.say('@' + msg.talker().name + "未查询到用户数据!")
+                    return
                 elif res_dict['success']:
                     await conversation.say('@' + msg.talker().name + '请查看' + z + '的电子保单文件!')
             elif '车架号' in text:
@@ -147,7 +148,8 @@ class MyBot(Wechaty):
                 response = requests.post(url, data=multipart_encoder, headers=headers)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                    await conversation.say('@' + msg.talker().name + "未查询到用户数据!")
+                    return
                 elif res_dict['success']:
                     await conversation.say('@' + msg.talker().name + '请查看' + z + '的电子保单文件!')
         elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:

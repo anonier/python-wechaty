@@ -87,7 +87,8 @@ class MyBot(Wechaty):
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
-                        'licenseId': x[y]
+                        'licenseId': x[y],
+                        'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -107,7 +108,8 @@ class MyBot(Wechaty):
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
-                        'licenseId': x[y]
+                        'licenseId': x[y],
+                        'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -133,7 +135,8 @@ class MyBot(Wechaty):
                     'contactId': contactId,
                     'path': '/img/robotOrder',
                     'storageServer': 'FASTDFS',
-                    'file': (str(int(time.time())) + '.jpg', BytesIO(hd_file_box.stream), 'image/jpeg')
+                    'file': (str(int(time.time())) + '.jpg', BytesIO(hd_file_box.stream), 'image/jpeg'),
+                    'appKey': "X08ASKYS"
                 },
                 boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
             )
@@ -312,7 +315,7 @@ async def main() -> None:
     bot = MyBot()
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.18.39.141:8788'
+    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.29.188.165:8788'
     await bot.start()
 
 

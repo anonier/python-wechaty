@@ -3,6 +3,7 @@ import asyncio
 import json
 import os
 import random
+import re
 import time
 from datetime import datetime
 from io import BytesIO
@@ -10,9 +11,7 @@ from typing import List, Optional, Union
 
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-from wechaty_puppet import get_logger
-
-from src.wechaty import (
+from wechaty import (
     MessageType,
     FileBox,
     Wechaty,
@@ -24,8 +23,24 @@ from src.wechaty import (
     FriendshipType,
     EventReadyPayload
 )
+from wechaty_puppet import get_logger
 
 logger = get_logger(__name__)
+
+license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼]" \
+                "{1}(([A-HJ-Z]{1}[A-HJ-NP-Z0-9]{5})|([A-HJ-Z]{1}(([DF]{1}[A-HJ-NP-Z0-9]{1}[0-9]{4})|([0-9]{5}[DF]" \
+                "{1})))|([A-HJ-Z]{1}[A-D0-9]{1}[0-9]{3}警)))|([0-9]{6}使)|((([沪粤川云桂鄂陕蒙藏黑辽渝]{1}A)|鲁B|闽D|蒙E|蒙H)" \
+                "[0-9]{4}领)|(WJ[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼·•]{1}[0-9]{4}[TDSHBXJ0-9]{1})" \
+                "|([VKHBSLJNGCE]{1}[A-DJ-PR-TVY]{1}[0-9]{5})"
+
+frame = "[A-HJ-NPR-Z\d]{17}$"
+
+
+def not_car_number(pattern, string):
+    if re.findall(pattern, string):
+        return False
+    else:
+        return True
 
 
 class MyBot(Wechaty):
@@ -80,14 +95,21 @@ class MyBot(Wechaty):
             if '车牌号' in text:
                 x = text.split()
                 y = x.index('车牌号') + 1
-
+                try:
+                    z = x[y]
+                except:
+                    z = None
+                if z is None or len(z) == 0 or not_car_number(license_plate, z):
+                    await conversation.say('@' + msg.talker().name + "未识别到车辆信息,请核对信息!")
+                    return
+                await conversation.say('@' + msg.talker().name + "收到查单指令,识别到车辆信息,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': roomId,
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
-                        'licenseId': x[y],
+                        'licenseId': z,
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -97,18 +119,26 @@ class MyBot(Wechaty):
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-                await conversation.say('@' + msg.talker().name + '获取保单成功')
+                elif res_dict['success']:
+                    await conversation.say('@' + msg.talker().name + '请查看' + z + '的电子保单文件!')
             elif '车架号' in text:
                 x = text.split()
                 y = x.index('车架号') + 1
-
+                try:
+                    z = x[y]
+                except:
+                    z = None
+                if z is None or len(z) == 0 or not_car_number(frame, z):
+                    await conversation.say('@' + msg.talker().name + "未识别到车辆信息,请核对信息!")
+                    return
+                await conversation.say('@' + msg.talker().name + "收到查单指令,识别到车辆信息,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': roomId,
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
-                        'licenseId': x[y],
+                        'licenseId': z,
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -118,13 +148,13 @@ class MyBot(Wechaty):
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-                await conversation.say('@' + msg.talker().name + '获取保单成功')
+                elif res_dict['success']:
+                    await conversation.say('@' + msg.talker().name + '请查看' + z + '的电子保单文件!')
         elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
             logger.info('receving image file')
-            # file_box: FileBox = await msg.to_file_box()
             image: Image = msg.to_image()
             hd_file_box: FileBox = await image.hd()
 
@@ -153,14 +183,14 @@ class MyBot(Wechaty):
         # artwork_file_box: FileBox = await image.artwork()
         # await artwork_file_box.to_file('/logs/robot/artwork-image.jpg', overwrite=True)
         # # reply the image
-
-        elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT,
-                          MessageType.MESSAGE_TYPE_VIDEO]:
-            logger.info('receving file ...')
-            file_box = await msg.to_file_box()
-            if file_box:
-                await file_box.to_file(file_box.name)
-
+        #
+        # elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT,
+        #                   MessageType.MESSAGE_TYPE_VIDEO]:
+        #     logger.info('receving file ...')
+        #     file_box = await msg.to_file_box()
+        #     if file_box:
+        #         await file_box.to_file(file_box.name)
+        #
         # elif msg_type == MessageType.MESSAGE_TYPE_MINI_PROGRAM:
         #     logger.info('receving mini-program ...')
         #     mini_program: Optional[MiniProgram] = await msg.to_mini_program()

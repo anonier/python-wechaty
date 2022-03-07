@@ -75,12 +75,12 @@ class MyBot(Wechaty):
         # 主机
         ip = 'http://192.168.1.196/'
 
-        if '@壹加壹' in text and '保单' not in text:
+        if '@壹加壹' in text and '查单' not in text and '报单' not in text:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
             # for num in range(10,20):
-            await conversation.say('@' + msg.talker().name + '哎呀 别动')
+            await conversation.say('@' + msg.talker().name + ' 请输入指令!')
             # file_box = FileBox.from_url(
             #     'http://img.v39pay.com/img/offlineFile/aa.pdf',
             #     name='ding-dong.pdf')
@@ -99,9 +99,9 @@ class MyBot(Wechaty):
                 except:
                     z = None
                 if z is None or len(z) == 0 or not_car_number(license_plate, z):
-                    await conversation.say('@' + msg.talker().name + "未识别到车辆信息,请核对信息!")
+                    await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
-                await conversation.say('@' + msg.talker().name + "收到查单指令,识别到车辆信息,数据处理中请稍后!")
+                await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': roomId,
@@ -117,10 +117,10 @@ class MyBot(Wechaty):
                 response = requests.post(url, data=multipart_encoder, headers=headers)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + "未查询到用户数据!")
+                    await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
                 elif res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + '请查看' + z + '的电子保单文件!')
+                    await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
             elif '车架号' in text:
                 x = text.split()
                 y = x.index('车架号') + 1
@@ -129,9 +129,9 @@ class MyBot(Wechaty):
                 except:
                     z = None
                 if z is None or len(z) == 0 or not_car_number(frame, z):
-                    await conversation.say('@' + msg.talker().name + "未识别到车辆信息,请核对信息!")
+                    await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
-                await conversation.say('@' + msg.talker().name + "收到查单指令,识别到车辆信息,数据处理中请稍后!")
+                await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': roomId,
@@ -147,10 +147,10 @@ class MyBot(Wechaty):
                 response = requests.post(url, data=multipart_encoder, headers=headers)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + "未查询到用户数据!")
+                    await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
                 elif res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + '请查看' + z + '的电子保单文件!')
+                    await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
         elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
@@ -346,7 +346,7 @@ async def main() -> None:
     bot = MyBot()
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.29.188.165:8788'
+    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.20.75.133:8788'
     await bot.start()
 
 

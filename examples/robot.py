@@ -35,6 +35,19 @@ license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋�
 
 frame = "[A-HJ-NPR-Z\d]{17}$"
 
+combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万'
+    , '进阶款': '交强险 车损险 三者险100万 司机1万 乘客1万'
+    , '不投保交强险': '车损险 三者险100万 司机1万 乘客1万'
+    , '不投保商业险': '交强险 车损险 司机1万 乘客1万'
+    , '不投保车损': '交强险 三者险100万 司机1万 乘客1万'
+    , '不投保司机': '交强险 车损险 三者险100万 乘客1万'
+    , '不投保乘客': '交强险 车损险 三者险100万 司机1万'
+    , '修改三者保额': '交强险 车损险 三者险300万 司机1万 乘客1万'
+    , '修改司机保额': '交强险 车损险 三者险100万 司机5万 乘客1万'
+    , '修改乘客保额': '交强险 车损险 三者险100万 司机1万 乘客5万'
+    , '修改车损险绝对免赔额': '交强险 车损险2000万 三者险100万 司机1万 乘客1万'
+    , '添加意外险': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30,2'}
+
 
 def not_car_number(pattern, string):
     if re.findall(pattern, string):
@@ -75,7 +88,7 @@ class MyBot(Wechaty):
         # 主机
         ip = 'http://192.168.1.196/'
 
-        if '@壹加壹' in text and '查单' not in text and '报单' not in text:
+        if '@壹加壹' in text and '查单' not in text and '报价' not in text:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
@@ -87,7 +100,7 @@ class MyBot(Wechaty):
             await conversation.ready()
             url = ip + 'api/RobotApi/declaration.do'
             x = text.split()
-            y = x.index('车牌号') + 1
+            y = x.index('查单') + 1
             try:
                 z = x[y]
             except:
@@ -121,71 +134,47 @@ class MyBot(Wechaty):
                     name=res_dict['fileName'])
                 await conversation.say(file_box)
 
-        elif '@壹加壹' in text and '报单' in text:
+        elif '@壹加壹' in text and '报价' in text:
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
             url = ip + 'api/RobotApi/declaration.do'
-            if '车牌号' in text:
-                x = text.split()
-                y = x.index('车牌号') + 1
-                try:
-                    z = x[y]
-                except:
-                    z = None
-                if z is None or len(z) == 0 or not_car_number(license_plate, z):
-                    await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
-                    return
-                await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': roomId,
-                        'contactId': contactId,
-                        'operator': "1",
-                        'cmdName': text,
-                        'licenseId': z,
-                        'appKey': "X08ASKYS"
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers)
-                res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
-                    return
-                elif res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
-            elif '车架号' in text:
-                x = text.split()
-                y = x.index('车架号') + 1
-                try:
-                    z = x[y]
-                except:
-                    z = None
-                if z is None or len(z) == 0 or not_car_number(frame, z):
-                    await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
-                    return
-                await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': roomId,
-                        'contactId': contactId,
-                        'operator': "1",
-                        'cmdName': text,
-                        'licenseId': z,
-                        'appKey': "X08ASKYS"
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers)
-                res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
-                    return
-                elif res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
+            x = text.split()
+            y = x.index('险种') + 1
+            z = x.index('业务员') + 1
+            try:
+                insurance = x[y]
+                salesman = x[z]
+                cmd = " ".join([b for b in x if y < x.index(b) < x.index('业务员')])
+            except:
+                insurance = None
+                salesman = None
+                cmd = None
+
+            if insurance is None or len(insurance) == 0 or cmd != combo[x[y]]:
+                await conversation.say('@' + msg.talker().name + " 未识别到指令,请重新核实后发送!")
+                return
+
+            await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
+            multipart_encoder = MultipartEncoder(
+                fields={
+                    'roomId': roomId,
+                    'contactId': contactId,
+                    'operator': "1",
+                    'cmdName': text,
+                    'licenseId': z,
+                    'appKey': "X08ASKYS"
+                },
+                boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+            )
+            headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+            response = requests.post(url, data=multipart_encoder, headers=headers)
+            res_dict = json.loads(response.text)
+            if not res_dict['success']:
+                await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                return
+            elif res_dict['success']:
+                await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
 
         elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
             conversation: Union[
@@ -381,7 +370,7 @@ async def main() -> None:
     bot = MyBot()
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.20.75.133:8788'
+    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.30.80.199:8788'
     await bot.start()
 
 

@@ -103,10 +103,10 @@ class MyBot(Wechaty):
                 x = text.split()
                 y = x.index('查单') + 1
                 try:
-                    z = x[y]
+                    insurance = x[y]
                 except:
-                    z = None
-                if z is None or len(z) == 0 or not_car_number(license_plate, z):
+                    insurance = None
+                if insurance is None or len(insurance) == 0 or not_car_number(license_plate, insurance):
                     await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
                 await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
@@ -132,7 +132,7 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
                 elif res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
+                    await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
                     for key, value in res_dict['data'].items():
                         file_box = FileBox.from_url(
                             value,

@@ -98,7 +98,7 @@ class MyBot(Wechaty):
             conversation: Union[
                 Room, Contact] = from_contact if room is None else room
             await conversation.ready()
-            url = ip + 'api/RobotApi/declaration.do'
+            url = ip + 'api/RobotApi/policy.do'
             x = text.split()
             y = x.index('查单') + 1
             try:
@@ -141,14 +141,11 @@ class MyBot(Wechaty):
             url = ip + 'api/RobotApi/declaration.do'
             x = text.split()
             y = x.index('险种') + 1
-            z = x.index('业务员') + 1
             try:
                 insurance = x[y]
-                salesman = x[z]
-                cmd = " ".join([b for b in x if y < x.index(b) < x.index('业务员')])
+                cmd = " ".join([b for b in x if y < x.index(b)])
             except:
                 insurance = None
-                salesman = None
                 cmd = None
 
             if insurance is None or len(insurance) == 0 or cmd != combo[x[y]]:
@@ -160,9 +157,8 @@ class MyBot(Wechaty):
                 fields={
                     'roomId': roomId,
                     'contactId': contactId,
-                    'operator': "1",
+                    'operator': "2",
                     'cmdName': text,
-                    'licenseId': z,
                     'appKey': "X08ASKYS"
                 },
                 boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -171,10 +167,15 @@ class MyBot(Wechaty):
             response = requests.post(url, data=multipart_encoder, headers=headers)
             res_dict = json.loads(response.text)
             if not res_dict['success']:
-                await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                 return
             elif res_dict['success']:
                 await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
+                res_dict = json.loads(response.text)
+                file_box = FileBox.from_url(
+                    res_dict['url'],
+                    name=res_dict['fileName'])
+                await conversation.say(file_box)
 
         elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
             conversation: Union[

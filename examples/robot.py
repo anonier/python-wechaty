@@ -116,7 +116,7 @@ class MyBot(Wechaty):
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
-                        'licenseId': z,
+                        'licenseId': insurance,
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))

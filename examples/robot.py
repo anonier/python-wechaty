@@ -45,7 +45,7 @@ combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万
     , '修改三者保额': '交强险 车损险 三者险300万 司机1万 乘客1万'
     , '修改司机保额': '交强险 车损险 三者险100万 司机5万 乘客1万'
     , '修改乘客保额': '交强险 车损险 三者险100万 司机1万 乘客5万'
-    , '修改车损险绝对免赔额': '交强险 车损险2000万 三者险100万 司机1万 乘客1万'
+    , '修改车损险绝对免赔额': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
     , '添加意外险': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30,2'}
 
 
@@ -86,7 +86,7 @@ class MyBot(Wechaty):
         # file_box: Optional[FileBox] = None
 
         # 主机
-        ip = 'http://192.168.1.196/'
+        ip = 'http://192.168.1.111/'
 
         if room.room_id == '25398111924@chatroom':
             if '@AI机器人' in text and '查单' not in text and '报价' not in text:
@@ -123,7 +123,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.get(url, data=multipart_encoder, headers=headers, timeout=5)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=5)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
@@ -133,11 +133,11 @@ class MyBot(Wechaty):
                     return
                 elif res_dict['success']:
                     await conversation.say('@' + msg.talker().name + ' 请查看' + z + '的电子保单文件!')
-                    res_dict = json.loads(response.text)
-                    file_box = FileBox.from_url(
-                        res_dict['url'],
-                        name=res_dict['fileName'])
-                    await conversation.say(file_box)
+                    for key, value in res_dict['data'].items():
+                        file_box = FileBox.from_url(
+                            value,
+                            name=key)
+                        await conversation.say(file_box)
 
             elif '@AI机器人' in text and '报价' in text:
                 conversation: Union[

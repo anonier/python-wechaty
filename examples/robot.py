@@ -36,17 +36,17 @@ license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋�
 frame = "[A-HJ-NPR-Z\d]{17}$"
 
 combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万'
-    , '进阶款': '交强险 车损险 三者险100万 司机1万 乘客1万'
-    , '不投保交强险': '车损险 三者险100万 司机1万 乘客1万'
-    , '不投保商业险': '交强险 车损险 司机1万 乘客1万'
-    , '不投保车损': '交强险 三者险100万 司机1万 乘客1万'
-    , '不投保司机': '交强险 车损险 三者险100万 乘客1万'
-    , '不投保乘客': '交强险 车损险 三者险100万 司机1万'
-    , '修改三者保额': '交强险 车损险 三者险300万 司机1万 乘客1万'
-    , '修改司机保额': '交强险 车损险 三者险100万 司机5万 乘客1万'
-    , '修改乘客保额': '交强险 车损险 三者险100万 司机1万 乘客5万'
-    , '修改车损险绝对免赔额': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
-    , '添加意外险': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30,2'}
+    , '进阶款': '交强险 车损险 三者险150万 司机5万 乘客1万'
+    , '基本款 -交强': '车损险 三者险100万 司机1万 乘客1万'
+    , '基本款 -商业': '交强险 车损险 司机1万 乘客1万'
+    , '基本款 -车损': '交强险 三者险100万 司机1万 乘客1万'
+    , '基本款 -司机': '交强险 车损险 三者险100万 乘客1万'
+    , '基本款 -乘客': '交强险 车损险 三者险100万 司机1万'
+    , '基本款 三者300': '交强险 车损险 三者险300万 司机1万 乘客1万'
+    , '基本款 司机5': '交强险 车损险 三者险100万 司机5万 乘客1万'
+    , '基本款 乘客5': '交强险 车损险 三者险100万 司机1万 乘客5万'
+    , '基本款 车损2000': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
+    , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
 
 
 def not_car_number(pattern, string):
@@ -93,7 +93,7 @@ class MyBot(Wechaty):
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
-                await conversation.say('@' + msg.talker().name + ' 请输入指令!')
+                await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')
 
             elif '@AI出单' in text and '查单' in text:
                 conversation: Union[
@@ -148,15 +148,21 @@ class MyBot(Wechaty):
                 y = x.index('险种') + 1
                 try:
                     insurance = x[y]
-                    cmd = " ".join([b for b in x if y < x.index(b)])
                 except:
                     insurance = None
-                    cmd = None
-
-                if insurance is None or len(insurance) == 0 or cmd != combo[x[y]]:
-                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请重新核实后发送!")
+                if insurance is None or len(insurance) == 0:
+                    await conversation.say('@' + msg.talker().name + " 未识别到保险套餐,请核实后重新发送!")
                     return
-
+                if len(x) > 3:
+                    try:
+                        cmd = " ".join([b for b in x if y < x.index(b)])
+                    except:
+                        cmd = None
+                    if cmd is None or cmd != combo[x[y]]:
+                        await conversation.say('@' + msg.talker().name + " 未识别到指令,请重新核实后发送!")
+                        return
+                else:
+                    insurance = combo[x[y + 1]]
                 await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
@@ -379,7 +385,7 @@ async def main() -> None:
     bot = MyBot()
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '172.30.80.199:8788'
+    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
     await bot.start()
 
 

@@ -89,13 +89,13 @@ class MyBot(Wechaty):
         ip = 'http://192.168.1.111/'
 
         if room.room_id == '25398111924@chatroom':
-            if '@AI机器人' in text and '查单' not in text and '报价' not in text:
+            if '@AI出单' in text and '查单' not in text and '报价' not in text:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 await conversation.say('@' + msg.talker().name + ' 请输入指令!')
 
-            elif '@AI机器人' in text and '查单' in text:
+            elif '@AI出单' in text and '查单' in text:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
@@ -139,7 +139,7 @@ class MyBot(Wechaty):
                             name=key)
                         await conversation.say(file_box)
 
-            elif '@AI机器人' in text and '报价' in text:
+            elif '@AI出单' in text and '报价' in text:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()

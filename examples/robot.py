@@ -123,7 +123,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=5)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
@@ -175,7 +175,7 @@ class MyBot(Wechaty):
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=5)
+                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")

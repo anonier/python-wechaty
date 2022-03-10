@@ -49,6 +49,10 @@ combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万
     , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
 
 
+def sleep_time(time_hour, time_min, time_second):
+    return time_hour * 3600 + time_min * 60 + time_second
+
+
 def not_car_number(pattern, string):
     if re.findall(pattern, string):
         return False
@@ -131,13 +135,43 @@ class MyBot(Wechaty):
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
-                elif res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
-                    for key, value in res_dict['data'].items():
-                        file_box = FileBox.from_url(
-                            value,
-                            name=key)
-                        await conversation.say(file_box)
+                num = 0
+                second = sleep_time(0, 0, 3)
+                while True:
+                    url = ip + 'robot/query/policy'
+                    multipart_encoder = MultipartEncoder(
+                        fields={
+                            'roomId': roomId,
+                            'contactId': contactId,
+                            'operator': "1",
+                            'cmdName': text,
+                            'licenseId': insurance,
+                            'appKey': "X08ASKYS"
+                        },
+                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                    )
+                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                    try:
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    except:
+                        if num == 3:
+                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                            return
+                    res_dict = json.loads(response.text)
+                    if not res_dict['success']:
+                        if num == 3:
+                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                            return
+                    elif res_dict['success']:
+                        await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
+                        for key, value in res_dict['data'].items():
+                            file_box = FileBox.from_url(
+                                value,
+                                name=key)
+                            await conversation.say(file_box)
+                        return
+                    num = num + 1
+                    time.sleep(second)
 
             elif '@AI出单' in text and '报价' in text:
                 conversation: Union[
@@ -214,18 +248,48 @@ class MyBot(Wechaty):
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                    await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
-                elif res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
+                num = 0
+                second = sleep_time(0, 0, 3)
+                while True:
+                    url = ip + 'robot/query/policy'
+                    multipart_encoder = MultipartEncoder(
+                        fields={
+                            'roomId': roomId,
+                            'contactId': contactId,
+                            'operator': "1",
+                            'cmdName': text,
+                            'licenseId': insurance,
+                            'appKey': "X08ASKYS"
+                        },
+                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                    )
+                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                    try:
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    except:
+                        if num == 3:
+                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                            return
                     res_dict = json.loads(response.text)
-                    file_box = FileBox.from_url(
-                        res_dict['url'],
-                        name=res_dict['fileName'])
-                    await conversation.say(file_box)
+                    if not res_dict['success']:
+                        if num == 3:
+                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                            return
+                    elif res_dict['success']:
+                        await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
+                        for key, value in res_dict['data'].items():
+                            file_box = FileBox.from_url(
+                                value,
+                                name=key)
+                            await conversation.say(file_box)
+                        return
+                    num = num + 1
+                    time.sleep(second)
 
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
                 conversation: Union[

@@ -123,7 +123,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
@@ -143,7 +143,7 @@ class MyBot(Wechaty):
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
-                url = ip + 'api/RobotApi/declaration.do'
+                url = 'http://192.168.1.196/' + 'api/RobotApi/declaration.do'
                 x = text.split()
                 y = x.index('险种') + 1
                 try:
@@ -153,7 +153,7 @@ class MyBot(Wechaty):
                 if insurance is None or len(insurance) == 0:
                     await conversation.say('@' + msg.talker().name + " 未识别到保险套餐,请核实后重新发送!")
                     return
-                if len(x) > 3:
+                if len(x) > 5:
                     try:
                         cmd = " ".join([b for b in x if y < x.index(b)])
                     except:
@@ -161,8 +161,41 @@ class MyBot(Wechaty):
                     if cmd is None or cmd != combo[x[y]]:
                         await conversation.say('@' + msg.talker().name + " 未识别到指令,请重新核实后发送!")
                         return
+                    jqInsurance = 'true'
+                    csInsurance = 'true'
+                    passenger = '1'
+                    if insurance == '基本款':
+                        szInsurance = '100'
+                        driver = '1'
+                    elif insurance == '进阶款':
+                        szInsurance = '150'
+                        driver = '5'
                 else:
-                    insurance = combo[x[y + 1]]
+                    insurance = combo[insurance + ' ' + x[y + 1]]
+                    if '交强险' in insurance:
+                        jqInsurance = 'true'
+                    else:
+                        jqInsurance = 'false'
+                    if '车损险' in insurance:
+                        csInsurance = 'true'
+                    else:
+                        csInsurance = 'false'
+                    if '三者险100万' in insurance:
+                        szInsurance = '100'
+                    elif '三者险150万' in insurance:
+                        szInsurance = '150'
+                    if '司机1万' in insurance:
+                        driver = '1'
+                    elif '司机5万' in insurance:
+                        driver = '5'
+                    if '乘客1万' in insurance:
+                        passenger = '1'
+                    elif '乘客5万' in insurance:
+                        passenger = '5'
+                    if '意外30*2' in insurance:
+                        accident = '30 * 2'
+                    else:
+                        accident = None
                 await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
@@ -170,12 +203,18 @@ class MyBot(Wechaty):
                         'contactId': contactId,
                         'operator': "2",
                         'cmdName': text,
-                        'appKey': "X08ASKYS"
+                        'appKey': "X08ASKYS",
+                        'jqInsurance': jqInsurance,
+                        'csInsurance': csInsurance,
+                        'szInsurance': szInsurance,
+                        'driver': driver,
+                        'passenger': passenger,
+                        'accident': accident
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")

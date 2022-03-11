@@ -91,7 +91,7 @@ class MyBot(Wechaty):
         # file_box: Optional[FileBox] = None
 
         # 主机
-        ip = 'http://192.168.1.111:8090/'
+        ip = 'http://192.168.1.196/'
 
         if room.room_id == '25398111924@chatroom':
             if '@AI出单' in text and '查单' not in text and '报价' not in text:
@@ -104,7 +104,7 @@ class MyBot(Wechaty):
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
-                url = ip + 'robot/query/policy'
+                url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 y = x.index('查单') + 1
                 try:
@@ -139,7 +139,7 @@ class MyBot(Wechaty):
                 num = 0
                 second = sleep_time(0, 0, 3)
                 while True:
-                    url = ip + 'robot/query/policy'
+                    url = ip + 'api/RobotApi/policy.do'
                     multipart_encoder = MultipartEncoder(
                         fields={
                             'roomId': roomId,
@@ -178,7 +178,7 @@ class MyBot(Wechaty):
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
-                url = 'http://192.168.1.196/' + 'api/RobotApi/declaration.do'
+                url = ip + 'api/RobotApi/declaration.do'
                 x = text.split()
                 y = x.index('险种') + 1
                 try:

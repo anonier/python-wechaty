@@ -91,7 +91,7 @@ class MyBot(Wechaty):
         # file_box: Optional[FileBox] = None
 
         # 主机
-        ip = 'http://192.168.1.196/'
+        ip = 'http://192.168.1.111/'
 
         if room.room_id == '25398111924@chatroom':
             if '@AI出单' in text and '查单' not in text and '报价' not in text:
@@ -128,7 +128,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
@@ -139,14 +139,10 @@ class MyBot(Wechaty):
                 num = 0
                 second = sleep_time(0, 0, 3)
                 while True:
-                    url = ip + 'api/RobotApi/policy.do'
+                    url = ip + 'api/RobotApi/pullPolicy.do'
                     multipart_encoder = MultipartEncoder(
                         fields={
-                            'roomId': roomId,
-                            'contactId': contactId,
-                            'operator': "1",
-                            'cmdName': text,
-                            'licenseId': insurance,
+                            'uuid': res_dict['data'],
                             'appKey': "X08ASKYS"
                         },
                         boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -206,8 +202,7 @@ class MyBot(Wechaty):
                     # elif insurance == '进阶款':
                     #     szInsurance = '150'
                     #     driver = '5'
-                else:
-                    insurance = combo[insurance + ' ' + x[y + 1]]
+                insurance = combo[insurance + ' ' + x[y + 1]]
                 if '交强险' in insurance:
                     jqInsurance = 'true'
                 else:

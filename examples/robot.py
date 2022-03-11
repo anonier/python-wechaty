@@ -46,7 +46,8 @@ combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万
     , '基本款 司机5': '交强险 车损险 三者险100万 司机5万 乘客1万'
     , '基本款 乘客5': '交强险 车损险 三者险100万 司机1万 乘客5万'
     , '基本款 车损2000': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
-    , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
+    , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'
+    , '基本款 意外30，2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
 
 
 def sleep_time(time_hour, time_min, time_second):
@@ -187,49 +188,52 @@ class MyBot(Wechaty):
                 if insurance is None or len(insurance) == 0:
                     await conversation.say('@' + msg.talker().name + " 未识别到保险套餐,请核实后重新发送!")
                     return
-                if len(x) > 5:
-                    try:
-                        cmd = " ".join([b for b in x if y < x.index(b)])
-                    except:
-                        cmd = None
-                    if cmd is None or cmd != combo[x[y]]:
-                        await conversation.say('@' + msg.talker().name + " 未识别到指令,请重新核实后发送!")
-                        return
-                    jqInsurance = 'true'
-                    csInsurance = 'true'
-                    passenger = '1'
-                    if insurance == '基本款':
-                        szInsurance = '100'
-                        driver = '1'
-                    elif insurance == '进阶款':
-                        szInsurance = '150'
-                        driver = '5'
+                if len(x) <= 3:
+                    insurance = combo[insurance]
+                    # try:
+                    #     cmd = " ".join([b for b in x if y < x.index(b)])
+                    # except:
+                    #     cmd = None
+                    # if cmd is None or cmd != combo[x[y]]:
+                    #     await conversation.say('@' + msg.talker().name + " 未识别到指令,请重新核实后发送!")
+                    #     return
+                    # jqInsurance = 'true'
+                    # csInsurance = 'true'
+                    # passenger = '1'
+                    # if insurance == '基本款':
+                    #     szInsurance = '100'
+                    #     driver = '1'
+                    # elif insurance == '进阶款':
+                    #     szInsurance = '150'
+                    #     driver = '5'
                 else:
                     insurance = combo[insurance + ' ' + x[y + 1]]
-                    if '交强险' in insurance:
-                        jqInsurance = 'true'
-                    else:
-                        jqInsurance = 'false'
-                    if '车损险' in insurance:
-                        csInsurance = 'true'
-                    else:
-                        csInsurance = 'false'
-                    if '三者险100万' in insurance:
-                        szInsurance = '100'
-                    elif '三者险150万' in insurance:
-                        szInsurance = '150'
-                    if '司机1万' in insurance:
-                        driver = '1'
-                    elif '司机5万' in insurance:
-                        driver = '5'
-                    if '乘客1万' in insurance:
-                        passenger = '1'
-                    elif '乘客5万' in insurance:
-                        passenger = '5'
-                    if '意外30*2' in insurance:
-                        accident = '30 * 2'
-                    else:
-                        accident = None
+                if '交强险' in insurance:
+                    jqInsurance = 'true'
+                else:
+                    jqInsurance = 'false'
+                if '车损险' in insurance:
+                    csInsurance = 'true'
+                elif '车损险2000' in insurance:
+                    csInsurance = '2000'
+                else:
+                    csInsurance = 'false'
+                if '三者险100万' in insurance:
+                    szInsurance = '100'
+                elif '三者险150万' in insurance:
+                    szInsurance = '150'
+                if '司机1万' in insurance:
+                    driver = '1'
+                elif '司机5万' in insurance:
+                    driver = '5'
+                if '乘客1万' in insurance:
+                    passenger = '1'
+                elif '乘客5万' in insurance:
+                    passenger = '5'
+                if '意外30*2' in insurance:
+                    accident = '30 * 2'
+                else:
+                    accident = None
                 await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={

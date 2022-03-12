@@ -31,57 +31,14 @@ from wechaty_puppet import get_logger
 
 logger = get_logger(__name__)
 
-license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼]" \
-                "{1}(([A-HJ-Z]{1}[A-HJ-NP-Z0-9]{5})|([A-HJ-Z]{1}(([DF]{1}[A-HJ-NP-Z0-9]{1}[0-9]{4})|([0-9]{5}[DF]" \
-                "{1})))|([A-HJ-Z]{1}[A-D0-9]{1}[0-9]{3}警)))|([0-9]{6}使)|((([沪粤川云桂鄂陕蒙藏黑辽渝]{1}A)|鲁B|闽D|蒙E|蒙H)" \
-                "[0-9]{4}领)|(WJ[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼·•]{1}[0-9]{4}[TDSHBXJ0-9]{1})" \
-                "|([VKHBSLJNGCE]{1}[A-DJ-PR-TVY]{1}[0-9]{5})"
 
-frame = "[A-HJ-NPR-Z\d]{17}$"
-
-combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万'
-    , '进阶款': '交强险 车损险 三者险150万 司机5万 乘客1万'
-    , '基本款 -交强': '车损险 三者险100万 司机1万 乘客1万'
-    , '基本款 -商业': '交强险 车损险 司机1万 乘客1万'
-    , '基本款 -车损': '交强险 三者险100万 司机1万 乘客1万'
-    , '基本款 -司机': '交强险 车损险 三者险100万 乘客1万'
-    , '基本款 -乘客': '交强险 车损险 三者险100万 司机1万'
-    , '基本款 三者300': '交强险 车损险 三者险300万 司机1万 乘客1万'
-    , '基本款 司机5': '交强险 车损险 三者险100万 司机5万 乘客1万'
-    , '基本款 乘客5': '交强险 车损险 三者险100万 司机1万 乘客5万'
-    , '基本款 车损2000': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
-    , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'
-    , '基本款 意外30，2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
-
-
-def create_pic(a, b, c, d, e, f, g):
-    img_cv = cv2.imread('img.jpg')
-    font = ImageFont.truetype("simfang.ttf", 14)
-    img_pil = Image.fromarray(img_cv)
-    draw = ImageDraw.Draw(img_pil)
-    draw.text((136, 84), a, font=font, fill=(0, 0, 0))
-    draw.text((136, 101), b, font=font, fill=(0, 0, 0))
-    img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
-    cv2.imwrite("img_cv.jpg", img)
-    cv2.waitKey()
-
-
-def create_qr(test):
-    imgdata = base64.b64decode(test)
-    file = open('qr.jpg', 'wb')
-    file.write(imgdata)
-    file.close()
-
-
-def sleep_time(time_hour, time_min, time_second):
-    return time_hour * 3600 + time_min * 60 + time_second
-
-
-def not_car_number(pattern, string):
-    if re.findall(pattern, string):
-        return False
-    else:
-        return True
+async def main() -> None:
+    """doc"""
+    bot = MyBot()
+    os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
+    os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
+    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
+    await bot.start()
 
 
 class MyBot(Wechaty):
@@ -501,13 +458,57 @@ class MyBot(Wechaty):
         await room.say(f'welcome {",".join(names)} to the wechaty group !')
 
 
-async def main() -> None:
-    """doc"""
-    bot = MyBot()
-    os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
-    os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
-    await bot.start()
+license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼]" \
+                "{1}(([A-HJ-Z]{1}[A-HJ-NP-Z0-9]{5})|([A-HJ-Z]{1}(([DF]{1}[A-HJ-NP-Z0-9]{1}[0-9]{4})|([0-9]{5}[DF]" \
+                "{1})))|([A-HJ-Z]{1}[A-D0-9]{1}[0-9]{3}警)))|([0-9]{6}使)|((([沪粤川云桂鄂陕蒙藏黑辽渝]{1}A)|鲁B|闽D|蒙E|蒙H)" \
+                "[0-9]{4}领)|(WJ[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼·•]{1}[0-9]{4}[TDSHBXJ0-9]{1})" \
+                "|([VKHBSLJNGCE]{1}[A-DJ-PR-TVY]{1}[0-9]{5})"
+
+frame = "[A-HJ-NPR-Z\d]{17}$"
+
+combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万'
+    , '进阶款': '交强险 车损险 三者险150万 司机5万 乘客1万'
+    , '基本款 -交强': '车损险 三者险100万 司机1万 乘客1万'
+    , '基本款 -商业': '交强险 车损险 司机1万 乘客1万'
+    , '基本款 -车损': '交强险 三者险100万 司机1万 乘客1万'
+    , '基本款 -司机': '交强险 车损险 三者险100万 乘客1万'
+    , '基本款 -乘客': '交强险 车损险 三者险100万 司机1万'
+    , '基本款 三者300': '交强险 车损险 三者险300万 司机1万 乘客1万'
+    , '基本款 司机5': '交强险 车损险 三者险100万 司机5万 乘客1万'
+    , '基本款 乘客5': '交强险 车损险 三者险100万 司机1万 乘客5万'
+    , '基本款 车损2000': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
+    , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'
+    , '基本款 意外30，2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
+
+
+def create_pic(a, b, c, d, e, f, g):
+    img_cv = cv2.imread('img.jpg')
+    font = ImageFont.truetype("simfang.ttf", 14)
+    img_pil = Image.fromarray(img_cv)
+    draw = ImageDraw.Draw(img_pil)
+    draw.text((136, 84), a, font=font, fill=(0, 0, 0))
+    draw.text((136, 101), b, font=font, fill=(0, 0, 0))
+    img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
+    cv2.imwrite("img_cv.jpg", img)
+    cv2.waitKey()
+
+
+def create_qr(test):
+    imgdata = base64.b64decode(test)
+    file = open('qr.jpg', 'wb')
+    file.write(imgdata)
+    file.close()
+
+
+def sleep_time(time_hour, time_min, time_second):
+    return time_hour * 3600 + time_min * 60 + time_second
+
+
+def not_car_number(pattern, string):
+    if re.findall(pattern, string):
+        return False
+    else:
+        return True
 
 
 asyncio.run(main())

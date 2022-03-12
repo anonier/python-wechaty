@@ -1,5 +1,6 @@
 """example code for ding-dong-bot with oop style"""
 import asyncio
+import base64
 import json
 import os
 import random
@@ -58,11 +59,18 @@ def create_pic(a, b, c, d, e, f, g):
     font = ImageFont.truetype("simfang.ttf", 14)
     img_pil = Image.fromarray(img_cv)
     draw = ImageDraw.Draw(img_pil)
-    draw.text((136, 84), "想写什么写什么", font=font, fill=(0, 0, 0))
-    draw.text((136, 101), "想写什么写什么", font=font, fill=(0, 0, 0))
+    draw.text((136, 84), a, font=font, fill=(0, 0, 0))
+    draw.text((136, 101), b, font=font, fill=(0, 0, 0))
     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
     cv2.imwrite("img_cv.jpg", img)
     cv2.waitKey()
+
+
+def create_qr(test):
+    imgdata = base64.b64decode(test)
+    file = open('qr.jpg', 'wb')
+    file.write(imgdata)
+    file.close()
 
 
 def sleep_time(time_hour, time_min, time_second):
@@ -293,7 +301,7 @@ class MyBot(Wechaty):
                             return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
-                        create_pic()
+                        create_pic(response_dict['success'], response_dict['success'], response_dict['success'])
                         file_box = FileBox.from_file(
                             'img_cv.jpg',
                             name='img_cv.jpg')

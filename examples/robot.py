@@ -9,7 +9,10 @@ from datetime import datetime
 from io import BytesIO
 from typing import List, Optional, Union
 
+import cv2
+import numpy as np
 import requests
+from PIL import ImageFont, Image, ImageDraw
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from wechaty import (
     MessageType,
@@ -18,7 +21,7 @@ from wechaty import (
     Contact,
     Room,
     Message,
-    Image,
+    Image as WeImage,
     Friendship,
     FriendshipType,
     EventReadyPayload
@@ -48,6 +51,18 @@ combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万
     , '基本款 车损2000': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
     , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'
     , '基本款 意外30，2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
+
+
+def create_pic(a, b, c, d, e, f, g):
+    img_cv = cv2.imread('img.jpg')
+    font = ImageFont.truetype("simfang.ttf", 14)
+    img_pil = Image.fromarray(img_cv)
+    draw = ImageDraw.Draw(img_pil)
+    draw.text((136, 84), "想写什么写什么", font=font, fill=(0, 0, 0))
+    draw.text((136, 101), "想写什么写什么", font=font, fill=(0, 0, 0))
+    img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
+    cv2.imwrite("img_cv.jpg", img)
+    cv2.waitKey()
 
 
 def sleep_time(time_hour, time_min, time_second):
@@ -91,7 +106,7 @@ class MyBot(Wechaty):
         # file_box: Optional[FileBox] = None
 
         # 主机
-        ip = 'http://192.168.1.111/'
+        ip = 'http://192.168.1.196/'
 
         if room.room_id == '25398111924@chatroom':
             if '@AI出单' in text and '查单' not in text and '报价' not in text:
@@ -259,11 +274,7 @@ class MyBot(Wechaty):
                     url = ip + 'robot/query/policy'
                     multipart_encoder = MultipartEncoder(
                         fields={
-                            'roomId': roomId,
-                            'contactId': contactId,
-                            'operator': "1",
-                            'cmdName': text,
-                            'licenseId': insurance,
+                            'uuid': res_dict['data'],
                             'appKey': "X08ASKYS"
                         },
                         boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -282,11 +293,11 @@ class MyBot(Wechaty):
                             return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
-                        for key, value in response_dict['data'].items():
-                            file_box = FileBox.from_url(
-                                value,
-                                name=key)
-                            await conversation.say(file_box)
+                        create_pic()
+                        file_box = FileBox.from_file(
+                            'img_cv.jpg',
+                            name='img_cv.jpg')
+                        await conversation.say(file_box)
                         return
                     num = num + 1
 
@@ -295,7 +306,7 @@ class MyBot(Wechaty):
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 logger.info('receving image file')
-                image: Image = msg.to_image()
+                image: WeImage = msg.to_image()
                 hd_file_box: FileBox = await image.hd()
                 url = ip + 'api/RobotApi/imgUpload.do'
                 multipart_encoder = MultipartEncoder(

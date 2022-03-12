@@ -139,6 +139,7 @@ class MyBot(Wechaty):
                 num = 0
                 second = sleep_time(0, 0, 3)
                 while True:
+                    time.sleep(second)
                     url = ip + 'api/RobotApi/pullPolicy.do'
                     multipart_encoder = MultipartEncoder(
                         fields={
@@ -154,21 +155,20 @@ class MyBot(Wechaty):
                         if num == 3:
                             await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                             return
-                    res_dict = json.loads(response.text)
-                    if not res_dict['success']:
+                    response_dict = json.loads(response.text)
+                    if not response_dict['success']:
                         if num == 3:
                             await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                             return
-                    elif res_dict['success']:
+                    elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
-                        for key, value in res_dict['data'].items():
+                        for key, value in response_dict['data'].items():
                             file_box = FileBox.from_url(
                                 value,
                                 name=key)
                             await conversation.say(file_box)
                         return
                     num = num + 1
-                    time.sleep(second)
 
             elif '@AI出单' in text and '报价' in text:
                 conversation: Union[
@@ -255,6 +255,7 @@ class MyBot(Wechaty):
                 num = 0
                 second = sleep_time(0, 0, 3)
                 while True:
+                    time.sleep(second)
                     url = ip + 'robot/query/policy'
                     multipart_encoder = MultipartEncoder(
                         fields={
@@ -274,21 +275,20 @@ class MyBot(Wechaty):
                         if num == 3:
                             await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                             return
-                    res_dict = json.loads(response.text)
-                    if not res_dict['success']:
+                    response_dict = json.loads(response.text)
+                    if not response_dict['success']:
                         if num == 3:
                             await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                             return
-                    elif res_dict['success']:
+                    elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
-                        for key, value in res_dict['data'].items():
+                        for key, value in response_dict['data'].items():
                             file_box = FileBox.from_url(
                                 value,
                                 name=key)
                             await conversation.say(file_box)
                         return
                     num = num + 1
-                    time.sleep(second)
 
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
                 conversation: Union[

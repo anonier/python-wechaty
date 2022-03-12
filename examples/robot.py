@@ -6,7 +6,6 @@ import os
 import random
 import re
 import time
-import flask_ctr as ctr
 from datetime import datetime
 from io import BytesIO
 from typing import List, Optional, Union
@@ -69,9 +68,8 @@ class MyBot(Wechaty):
         room: Optional[Room] = msg.room()
         roomId = room.room_id
         msg_type: MessageType = msg.type()
-        # file_box: Optional[FileBox] = None
+        # file_box: Optional[FileBox] = None'
 
-        # 主机
         ip = 'http://192.168.1.196/'
 
         if room.room_id == '25398111924@chatroom':

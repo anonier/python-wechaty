@@ -1,4 +1,5 @@
 import json
+import asyncio
 import robot
 import flask
 from flask import request
@@ -37,11 +38,11 @@ def login():
         return json.dumps(resu, ensure_ascii=False)
     from_contact: Contact = msg.talker()
     room: Optional[Room] = msg.room()
-    await conversation.ready()
+    conversation.ready()
     conversation: Union[
         Room, Contact] = from_contact if room is None else room
-    await conversation.ready()
-    await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
+    conversation.ready()
+    conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
 
 
 if __name__ == '__main__':

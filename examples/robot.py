@@ -309,7 +309,7 @@ class MyBot(Wechaty):
                             [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
                                 'amount']
                             + '元，保费' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
                                 'premium']
                             + '元 。代收车船税' + res_dict['data']['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
                         create_pic(response_dict['success'], response_dict['success'], response_dict['success'])
@@ -521,13 +521,67 @@ license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋�
 frame = "[A-HJ-NPR-Z\d]{17}$"
 
 
-def create_pic(a, b, c, d, e, f, g):
+def create_pic(res_dict):
     img_cv = cv2.imread('img.jpg')
     font = ImageFont.truetype("微软雅黑.ttc", 10)
-    img_pil = Image.fromarray(img_cv)
+    img_pil = Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(img_pil)
-    draw.text((a, b), a, font=font, fill=(0, 0, 0))
-    draw.text((136, 101), b, font=font, fill=(0, 0, 0))
+    # 车牌号
+    draw.text((100, 158), res_dict['data']['plateNumber'], font=font, fill=(0, 0, 0))
+    # 被保险人
+    draw.text((492, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    # 行驶证车主
+    draw.text((492, 183), res_dict['data']['ownerName'], font=font, fill=(0, 0, 0))
+    # 厂牌车型
+    draw.text((100, 183), res_dict['data']['carBrand'], font=font, fill=(0, 0, 0))
+    # 核定载客
+    draw.text((492, 210), res_dict['data']['limitLoadPerson'], font=font, fill=(0, 0, 0))
+    # 使用性质
+    draw.text((100, 210), res_dict['data']['usage'], font=font, fill=(0, 0, 0))
+    # 交强险保修期限
+    draw.text((178, 247), res_dict['data']['compulsoryStartTime'] + '至' + res_dict['data']['compulsoryEndTime'],
+              font=font, fill=(0, 0, 0))
+    # 商业险保修期限
+    draw.text((178, 274), res_dict['data']['businessStartTime'] + '至' + res_dict['data']['businessEndTime'], font=font,
+              fill=(0, 0, 0))
+    # 机动车损失保险
+    draw.text((328, 414), [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0]['amount'],
+              font=font, fill=(0, 0, 0))
+    draw.text((501, 414),
+              [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0]['premium'], font=font,
+              fill=(0, 0, 0))
+    # 机动车第三者责任保险
+    draw.text((328, 445), [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
+        'amount'], font=font, fill=(0, 0, 0))
+    draw.text((501, 445), [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
+        'premium'], font=font, fill=(0, 0, 0))
+    # 司机
+    draw.text((328, 475), [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+        'amount'], font=font, fill=(0, 0, 0))
+    draw.text((501, 475), [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+        'premium'], font=font, fill=(0, 0, 0))
+    # 乘客
+    draw.text((328, 505), [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
+        'amount'], font=font, fill=(0, 0, 0))
+    draw.text((501, 505), [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
+        'premium'], font=font, fill=(0, 0, 0))
+    # # 道路救援
+    # draw.text((328, 534), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    # draw.text((501, 534), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    # # 代为驾驶
+    # draw.text((328, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    # draw.text((501, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    # # 代为送检
+    # draw.text((328, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    # draw.text((501, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    # 商业险合计
+    draw.text((503, 654), res_dict['data']['businessPremium'], font=font, fill=(0, 0, 0))
+    # 交强险合计
+    draw.text((503, 684), res_dict['data']['compulsoryPremium'], font=font, fill=(0, 0, 0))
+    # 车船税
+    draw.text((503, 714), res_dict['data']['taxPremium'], font=font, fill=(0, 0, 0))
+    # 保单费用合计
+    draw.text((503, 744), res_dict['data']['totalPremium'], font=font, fill=(0, 0, 0))
     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
     cv2.imwrite("img_cv.jpg", img)
     cv2.waitKey()

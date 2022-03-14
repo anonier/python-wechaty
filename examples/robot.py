@@ -70,7 +70,7 @@ class MyBot(Wechaty):
         msg_type: MessageType = msg.type()
         # file_box: Optional[FileBox] = None'
 
-        ip = 'http://192.168.1.196/'
+        ip = 'http://192.168.1.111/'
 
         if room.room_id == '25398111924@chatroom':
             if '@AI出单' in text and '查单' not in text and '报价' not in text:
@@ -109,11 +109,11 @@ class MyBot(Wechaty):
                 try:
                     response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
                 except:
-                    await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 num = 0
                 second = sleep_time(0, 0, 3)
@@ -132,12 +132,12 @@ class MyBot(Wechaty):
                         response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
                     except:
                         if num == 3:
-                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
                     if not response_dict['success']:
                         if num == 3:
-                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
@@ -155,59 +155,74 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 url = ip + 'api/RobotApi/declaration.do'
                 x = text.split()
-                y = x.index('险种') + 1
-                try:
-                    insurance = x[y]
-                except:
-                    insurance = None
+                insurance = [a for a in x if '基本' in a or '进阶' in a]
                 if insurance is None or len(insurance) == 0:
-                    await conversation.say('@' + msg.talker().name + " 未识别到保险套餐,请核实后重新发送!")
+                    await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
                     return
-                if len(x) <= 3:
-                    insurance = combo[insurance]
-                    # try:
-                    #     cmd = " ".join([b for b in x if y < x.index(b)])
-                    # except:
-                    #     cmd = None
-                    # if cmd is None or cmd != combo[x[y]]:
-                    #     await conversation.say('@' + msg.talker().name + " 未识别到指令,请重新核实后发送!")
-                    #     return
-                    # jqInsurance = 'true'
-                    # csInsurance = 'true'
-                    # passenger = '1'
-                    # if insurance == '基本款':
-                    #     szInsurance = '100'
-                    #     driver = '1'
-                    # elif insurance == '进阶款':
-                    #     szInsurance = '150'
-                    #     driver = '5'
-                insurance = combo[insurance + ' ' + x[y + 1]]
-                if '交强险' in insurance:
-                    jqInsurance = 'true'
-                else:
-                    jqInsurance = 'false'
-                if '车损险' in insurance:
-                    csInsurance = 'true'
-                elif '车损险2000' in insurance:
-                    csInsurance = '2000'
-                else:
-                    csInsurance = 'false'
-                if '三者险100万' in insurance:
-                    szInsurance = '100'
-                elif '三者险150万' in insurance:
-                    szInsurance = '150'
-                if '司机1万' in insurance:
-                    driver = '1'
-                elif '司机5万' in insurance:
-                    driver = '5'
-                if '乘客1万' in insurance:
-                    passenger = '1'
-                elif '乘客5万' in insurance:
-                    passenger = '5'
-                if '意外30*2' in insurance:
-                    accident = '30 * 2'
-                else:
-                    accident = None
+                if '基本' in insurance[0]:
+                    if len(x) == 4:
+                        if len([a for a in x if '-商业' in a]) != 0:
+                            jqInsurance = 'true'
+                            csInsurance = 'false'
+                            szInsurance = None
+                            driver = None
+                            passenger = None
+                            accident = None
+                        else:
+                            jqInsurance = 'false' if [a for a in x if '-交强' in a] else 'true'
+                            if len([a for a in x if '-车损' in a]) != 0:
+                                csInsurance = 'false'
+                            elif len([a for a in x if '车损' in a and '-' not in a]) != 0:
+                                csInsurance = get_number(a for a in x if '车损' in a)
+                            else:
+                                csInsurance = 'true'
+                            szInsurance = '100' if len([a for a in x if '三者' in a]) == 0 else get_number(
+                                str([a for a in x if '三者' in a]))
+                            driver = '1' if len([a for a in x if '司机' in a]) == 0 else get_number(
+                                str([a for a in x if '司机' in a]))
+                            passenger = '1' if len([a for a in x if '乘客' in a]) == 0 else get_number(
+                                str([a for a in x if '乘客' in a]))
+                            accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
+                                str([a for a in x if '意外' in a]))
+                    elif len(x) > 4 <= 6:
+                        jqInsurance = 'true'
+                        csInsurance = 'true'
+                        szInsurance = get_number(str([a for a in x if '三者' in a]))
+                        driver = get_number(str([a for a in x if '司机' in a]))
+                        passenger = get_number(str([a for a in x if '乘客' in a]))
+                        accident = None
+                elif '进阶' in insurance[0]:
+                    if len(x) == 4:
+                        if len([a for a in x if '-商业' in a]) != 0:
+                            jqInsurance = 'true'
+                            csInsurance = 'false'
+                            szInsurance = None
+                            driver = None
+                            passenger = None
+                            accident = None
+                        else:
+                            jqInsurance = 'false' if [a for a in x if '-交强' in a] else 'true'
+                            if len([a for a in x if '-车损' in a]) != 0:
+                                csInsurance = 'false'
+                            elif len([a for a in x if '车损' in a and '-' not in a]) != 0:
+                                csInsurance = get_number(a for a in x if '车损' in a)
+                            else:
+                                csInsurance = 'true'
+                            szInsurance = '150' if len([a for a in x if '三者' in a]) == 0 else get_number(
+                                str([a for a in x if '三者' in a]))
+                            driver = '5' if len([a for a in x if '司机' in a]) == 0 else get_number(
+                                str([a for a in x if '司机' in a]))
+                            passenger = '5' if len([a for a in x if '乘客' in a]) == 0 else get_number(
+                                str([a for a in x if '乘客' in a]))
+                            accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
+                                str([a for a in x if '意外' in a]))
+                    elif len(x) > 4 <= 6:
+                        jqInsurance = 'true'
+                        csInsurance = 'true'
+                        szInsurance = get_number(str([a for a in x if '三者' in a]))
+                        driver = get_number(str([a for a in x if '司机' in a]))
+                        passenger = get_number(str([a for a in x if '乘客' in a]))
+                        accident = None
                 await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
@@ -235,7 +250,7 @@ class MyBot(Wechaty):
                 second = sleep_time(0, 0, 3)
                 while True:
                     time.sleep(second)
-                    url = ip + 'robot/query/policy'
+                    url = ip + 'api/RobotApi/pullPolicy.do'
                     multipart_encoder = MultipartEncoder(
                         fields={
                             'uuid': res_dict['data'],
@@ -465,20 +480,6 @@ license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋�
 
 frame = "[A-HJ-NPR-Z\d]{17}$"
 
-combo = {'基本款': '交强险 车损险 三者险100万 司机1万 乘客1万'
-    , '进阶款': '交强险 车损险 三者险150万 司机5万 乘客1万'
-    , '基本款 -交强': '车损险 三者险100万 司机1万 乘客1万'
-    , '基本款 -商业': '交强险 车损险 司机1万 乘客1万'
-    , '基本款 -车损': '交强险 三者险100万 司机1万 乘客1万'
-    , '基本款 -司机': '交强险 车损险 三者险100万 乘客1万'
-    , '基本款 -乘客': '交强险 车损险 三者险100万 司机1万'
-    , '基本款 三者300': '交强险 车损险 三者险300万 司机1万 乘客1万'
-    , '基本款 司机5': '交强险 车损险 三者险100万 司机5万 乘客1万'
-    , '基本款 乘客5': '交强险 车损险 三者险100万 司机1万 乘客5万'
-    , '基本款 车损2000': '交强险 车损险2000 三者险100万 司机1万 乘客1万'
-    , '基本款 意外30,2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'
-    , '基本款 意外30，2': '交强险 车损险 三者险100万 司机1万 乘客1万 意外30*2'}
-
 
 def create_pic(a, b, c, d, e, f, g):
     img_cv = cv2.imread('img.jpg')
@@ -508,6 +509,10 @@ def not_car_number(pattern, string):
         return False
     else:
         return True
+
+
+def get_number(string):
+    return re.findall(r"\d+\.?\d*", string)
 
 
 asyncio.run(main())

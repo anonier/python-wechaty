@@ -70,7 +70,7 @@ class MyBot(Wechaty):
         msg_type: MessageType = msg.type()
         # file_box: Optional[FileBox] = None'
 
-        ip = 'http://192.168.1.111/'
+        ip = 'http://192.168.1.196/'
 
         if room.room_id == '25398111924@chatroom':
             if '@AI出单' in text and '查单' not in text and '报价' not in text:
@@ -246,39 +246,73 @@ class MyBot(Wechaty):
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
-                num = 0
-                second = sleep_time(0, 0, 3)
-                while True:
-                    time.sleep(second)
-                    url = ip + 'api/RobotApi/pullPolicy.do'
-                    multipart_encoder = MultipartEncoder(
-                        fields={
-                            'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
-                        },
-                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                    )
-                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                    try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
-                    except:
-                        if num == 3:
-                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
-                            return
-                    response_dict = json.loads(response.text)
-                    if not response_dict['success']:
-                        if num == 3:
-                            await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
-                            return
-                    elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
-                        create_pic(response_dict['success'], response_dict['success'], response_dict['success'])
-                        file_box = FileBox.from_file(
-                            'img_cv.jpg',
-                            name='img_cv.jpg')
-                        await conversation.say(file_box)
-                        return
-                    num = num + 1
+                await conversation.say('@' + msg.talker().name + ' 本车客户风险等级:' + res_dict['data'][
+                    'customerRiskRating'] + '; 车系风险等级:' + res_dict['data']['familyGrade'] + '; 无赔系数:*; 自主定价系数:' +
+                                       res_dict['data']['rateProduct'] + '。')
+                await conversation.say(
+                    '@' + msg.talker().name + ' ' + res_dict['data'][
+                        'ownerName'] + '，您好！您的爱车' + res_dict['data'][
+                        'plateNumber'] + '预计估价共计' + res_dict['data']['totalPremium'] + '元，其中交强险' +
+                    res_dict['data'][
+                        'compulsoryPremium'] + '元， 商业险' + res_dict['data'][
+                        'businessPremium'] + '元。商业险明细：车损保额'
+                    + [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0]['amount']
+                    + '元，保费' + [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0][
+                        'premium']
+                    + '元 ；三者保额' + [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
+                        'amount']
+                    + '元，保费' + [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
+                        'premium']
+                    + '元 ；司机保额' + [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                        'amount']
+                    + '元，保费' + [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                        'premium']
+                    + '元；乘客保额' + [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
+                        'amount']
+                    + '元，保费' + [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                        'premium']
+                    + '元 。代收车船税' + res_dict['data']['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
+                create_pic(res_dict['success'], res_dict['success'], res_dict['success'])
+                file_box = FileBox.from_file(
+                    'img_cv.jpg',
+                    name='img_cv.jpg')
+                await conversation.say(file_box)
+                return
+                # num = 0
+                # second = sleep_time(0, 0, 3)
+                # while True:
+                #     time.sleep(second)
+                #     url = ip + 'api/RobotApi/pullPolicy.do'
+                #     multipart_encoder = MultipartEncoder(
+                #         fields={
+                #             'uuid': res_dict['data'],
+                #             'appKey': "X08ASKYS"
+                #         },
+                #         boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                #     )
+                #     headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                #     try:
+                #         response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                #     except:
+                #         if num == 3:
+                #             await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                #             return
+                #     response_dict = json.loads(response.text)
+                #     if not response_dict['success']:
+                #         if num == 3:
+                #             await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
+                #             return
+                #     elif response_dict['success']:
+                #         await conversation.say('@' + msg.talker().name + '本车客户风险等级:*; 车系风险等级:*; 无赔系数:*; 自主定价系数:*。')
+                #         await conversation.say(
+                #             '@' + msg.talker().name + '张三，您好！您的爱车*预计估价共计*元，其中交强险*元， 商业险*元。商业险明细：车损保额*元，保费*元 ；三者保额*元，保费*元 ；司机保额*元，保费30元；乘客保额*元，保费*元 。代收车船税*元。此报价仅供参考，最终价格以出单为准。')
+                #         create_pic(response_dict['success'], response_dict['success'], response_dict['success'])
+                #         file_box = FileBox.from_file(
+                #             'img_cv.jpg',
+                #             name='img_cv.jpg')
+                #         await conversation.say(file_box)
+                #         return
+                #     num = num + 1
 
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
                 conversation: Union[
@@ -483,10 +517,10 @@ frame = "[A-HJ-NPR-Z\d]{17}$"
 
 def create_pic(a, b, c, d, e, f, g):
     img_cv = cv2.imread('img.jpg')
-    font = ImageFont.truetype("simfang.ttf", 14)
+    font = ImageFont.truetype("微软雅黑.ttc", 10)
     img_pil = Image.fromarray(img_cv)
     draw = ImageDraw.Draw(img_pil)
-    draw.text((136, 84), a, font=font, fill=(0, 0, 0))
+    draw.text((a, b), a, font=font, fill=(0, 0, 0))
     draw.text((136, 101), b, font=font, fill=(0, 0, 0))
     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
     cv2.imwrite("img_cv.jpg", img)

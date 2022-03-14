@@ -233,10 +233,10 @@ class MyBot(Wechaty):
                         'appKey': "X08ASKYS",
                         'jqInsurance': jqInsurance,
                         'csInsurance': csInsurance,
-                        'szInsurance': szInsurance,
-                        'driver': driver,
-                        'passenger': passenger,
-                        'accident': accident
+                        'szInsurance': szInsurance[0],
+                        'driver': driver[0],
+                        'passenger': passenger[0],
+                        'accident': None if accident is None else accident[0] + '*' + accident[1]
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )

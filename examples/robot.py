@@ -246,12 +246,6 @@ class MyBot(Wechaty):
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                     return
-                create_pic(res_dict)
-                file_box = FileBox.from_file(
-                    'img_cv.jpg',
-                    name='img_cv.jpg')
-                await conversation.say(file_box)
-                return
                 num = 0
                 second = sleep_time(0, 0, 3)
                 while True:
@@ -312,7 +306,7 @@ class MyBot(Wechaty):
                             [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
                                 'premium']
                             + '元 。代收车船税' + res_dict['data']['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
-                        create_pic(response_dict['success'], response_dict['success'], response_dict['success'])
+                        create_pic(res_dict)
                         file_box = FileBox.from_file(
                             'img_cv.jpg',
                             name='img_cv.jpg')

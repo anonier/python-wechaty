@@ -236,7 +236,7 @@ class MyBot(Wechaty):
                         'szInsurance': szInsurance[0],
                         'driver': driver[0],
                         'passenger': passenger[0],
-                        'accident': None if accident is None else accident[0] + '*' + accident[1]
+                        'accident': None if accident is None else '*'.join(accident)
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )

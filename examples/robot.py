@@ -535,7 +535,7 @@ def create_pic(res_dict):
     # 厂牌车型
     draw.text((100, 183), res_dict['data']['carBrand'], font=font, fill=(0, 0, 0))
     # 核定载客
-    draw.text((492, 210), res_dict['data']['limitLoadPerson'], font=font, fill=(0, 0, 0))
+    draw.text((492, 210), res_dict['data']['limitLoadPerson'] + '人', font=font, fill=(0, 0, 0))
     # 使用性质
     draw.text((100, 210), res_dict['data']['usage'], font=font, fill=(0, 0, 0))
     # 交强险保修期限
@@ -575,13 +575,13 @@ def create_pic(res_dict):
     # draw.text((328, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
     # draw.text((501, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
     # 商业险合计
-    draw.text((503, 654), res_dict['data']['businessPremium'], font=font, fill=(0, 0, 0))
+    draw.text((503, 654), res_dict['data']['businessPremium'] + '元', font=font, fill=(0, 0, 0))
     # 交强险合计
-    draw.text((503, 684), res_dict['data']['compulsoryPremium'], font=font, fill=(0, 0, 0))
+    draw.text((503, 684), res_dict['data']['compulsoryPremium'] + '元', font=font, fill=(0, 0, 0))
     # 车船税
-    draw.text((503, 714), res_dict['data']['taxPremium'], font=font, fill=(0, 0, 0))
+    draw.text((503, 714), res_dict['data']['taxPremium'] + '元', font=font, fill=(0, 0, 0))
     # 保单费用合计
-    draw.text((503, 744), res_dict['data']['totalPremium'], font=font, fill=(0, 0, 0))
+    draw.text((503, 744), res_dict['data']['totalPremium'] + '元', font=font, fill=(0, 0, 0))
     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
     cv2.imwrite("img_cv.jpg", img)
     cv2.waitKey()

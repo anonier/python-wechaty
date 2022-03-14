@@ -70,7 +70,7 @@ class MyBot(Wechaty):
         msg_type: MessageType = msg.type()
         # file_box: Optional[FileBox] = None'
 
-        ip = 'http://192.168.1.196/'
+        ip = 'http://192.168.1.111/'
 
         if room.room_id == '25398111924@chatroom':
             if '@AI出单' in text and '查单' not in text and '报价' not in text:

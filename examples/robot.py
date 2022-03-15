@@ -97,7 +97,7 @@ class MyBot(Wechaty):
                 await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
                 man_cmd = [a for a in x if '业务员' in a][0]
                 salesman = man_cmd.split(':')[1] if len([a for a in x if '业务员' in a and ':' in a]) != 0 else \
-                    man_cmd.split('：')[1]
+                man_cmd.split('：')[1]
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': roomId,
@@ -165,7 +165,10 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
                     return
                 if '基本' in insurance[0]:
-                    if len(x) == 4:
+                    man_cmd = [a for a in x if '业务员' in a][0]
+                    salesman = man_cmd.split(':')[1] if len([a for a in x if '业务员' in a and ':' in a]) != 0 else \
+                        man_cmd.split('：')[1]
+                    if len(x) == 5:
                         if len([a for a in x if '-商业' in a]) != 0:
                             jqInsurance = 'true'
                             csInsurance = 'false'
@@ -189,7 +192,7 @@ class MyBot(Wechaty):
                                 str([a for a in x if '乘客' in a]))
                             accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
                                 str([a for a in x if '意外' in a]))
-                    elif len(x) == 6:
+                    elif len(x) == 7:
                         jqInsurance = 'true'
                         csInsurance = 'true'
                         szInsurance = get_number(str([a for a in x if '三者' in a]))
@@ -200,7 +203,7 @@ class MyBot(Wechaty):
                         await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
                         return
                 elif '进阶' in insurance[0]:
-                    if len(x) == 4:
+                    if len(x) == 5:
                         if len([a for a in x if '-商业' in a]) != 0:
                             jqInsurance = 'true'
                             csInsurance = 'false'
@@ -224,7 +227,7 @@ class MyBot(Wechaty):
                                 str([a for a in x if '乘客' in a]))
                             accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
                                 str([a for a in x if '意外' in a]))
-                    elif len(x) == 6:
+                    elif len(x) == 7:
                         jqInsurance = 'true'
                         csInsurance = 'true'
                         szInsurance = get_number(str([a for a in x if '三者' in a]))
@@ -245,6 +248,7 @@ class MyBot(Wechaty):
                         'jqInsurance': jqInsurance,
                         'csInsurance': csInsurance,
                         'szInsurance': szInsurance[0],
+                        'salesman': salesman,
                         'driver': driver[0],
                         'passenger': passenger[0],
                         'accident': None if accident is None else '*'.join(accident)

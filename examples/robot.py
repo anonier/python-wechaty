@@ -140,7 +140,7 @@ class MyBot(Wechaty):
                             return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + insurance[0] + '的电子保单文件!')
-                        for key, value in response_dict['data'].items():
+                        for key, value in json.loads(response_dict['data']).items():
                             file_box = FileBox.from_url(
                                 value,
                                 name=key)
@@ -155,7 +155,7 @@ class MyBot(Wechaty):
                 url = ip + 'api/RobotApi/declaration.do'
                 x = text.split()
                 insurance = [a for a in x if '基本' in a or '进阶' in a]
-                if insurance is None or len(insurance) == 0:
+                if len(insurance) == 0:
                     await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
                     return
                 if '基本' in insurance[0]:
@@ -218,13 +218,16 @@ class MyBot(Wechaty):
                                 str([a for a in x if '乘客' in a]))
                             accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
                                 str([a for a in x if '意外' in a]))
-                    elif len(x) > 4 <= 6:
+                    elif len(x) == 6:
                         jqInsurance = 'true'
                         csInsurance = 'true'
                         szInsurance = get_number(str([a for a in x if '三者' in a]))
                         driver = get_number(str([a for a in x if '司机' in a]))
                         passenger = get_number(str([a for a in x if '乘客' in a]))
                         accident = None
+                    else:
+                        await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
+                        return
                 await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={

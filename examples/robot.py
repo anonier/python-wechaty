@@ -248,7 +248,11 @@ class MyBot(Wechaty):
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                try:
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                except:
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                    return
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
@@ -314,7 +318,7 @@ class MyBot(Wechaty):
                             img = create_pic(data)
                             file_box = FileBox.from_base64(
                                 img,
-                                name='img_cv.jpg')
+                                name='img.jpg')
                             await conversation.say(file_box)
                             return
                         except:
@@ -564,15 +568,24 @@ def create_pic(data):
               fill=(0, 0, 0))
     draw.text((501, 505), [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0]['premium'], font=font,
               fill=(0, 0, 0))
-    # # 道路救援
-    # draw.text((328, 534), data['theInsured'], font=font, fill=(0, 0, 0))
-    # draw.text((501, 534), data['theInsured'], font=font, fill=(0, 0, 0))
-    # # 代为驾驶
-    # draw.text((328, 158), data['theInsured'], font=font, fill=(0, 0, 0))
-    # draw.text((501, 158), data['theInsured'], font=font, fill=(0, 0, 0))
-    # # 代为送检
-    # draw.text((328, 158), data['theInsured'], font=font, fill=(0, 0, 0))
-    # draw.text((501, 158), data['theInsured'], font=font, fill=(0, 0, 0))
+    # 道路救援
+    draw.text((328, 534),
+              [a for a in data['policyBusinessCategoryList'] if "道路救援" in a['name']][0]['serviceTimes'] + '次',
+              font=font, fill=(0, 0, 0))
+    draw.text((501, 534), [a for a in data['policyBusinessCategoryList'] if "道路救援" in a['name']][0]['premium'],
+              font=font, fill=(0, 0, 0))
+    # 代为驾驶
+    draw.text((328, 564),
+              [a for a in data['policyBusinessCategoryList'] if "代为驾驶" in a['name']][0]['serviceTimes'] + '次',
+              font=font, fill=(0, 0, 0))
+    draw.text((501, 564), [a for a in data['policyBusinessCategoryList'] if "代为驾驶" in a['name']][0]['premium'],
+              font=font, fill=(0, 0, 0))
+    # 代为送检
+    draw.text((328, 594),
+              [a for a in data['policyBusinessCategoryList'] if "代为送检" in a['name']][0]['serviceTimes'] + '次',
+              font=font, fill=(0, 0, 0))
+    draw.text((501, 594), [a for a in data['policyBusinessCategoryList'] if "代为送检" in a['name']][0]['premium'],
+              font=font, fill=(0, 0, 0))
     # 商业险合计
     draw.text((503, 654), data['businessPremium'] + '元', font=font, fill=(0, 0, 0))
     # 交强险合计

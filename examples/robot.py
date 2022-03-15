@@ -311,9 +311,9 @@ class MyBot(Wechaty):
                                 + [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0][
                                     'premium'] + '元 。代收车船税'
                                 + data['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
-                            create_pic(data)
-                            file_box = FileBox.from_file(
-                                'img_cv.jpg',
+                            img = create_pic(data)
+                            file_box = FileBox.from_base64(
+                                img,
                                 name='img_cv.jpg')
                             await conversation.say(file_box)
                             return
@@ -582,11 +582,9 @@ def create_pic(data):
     # 保单费用合计
     draw.text((503, 744), data['totalPremium'] + '元', font=font, fill=(0, 0, 0))
     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
-    # img_encode = cv2.imencode('.jpg', img)
-    # str_encode = img_encode[1].tostring()
-    # return BytesIO(str_encode)
-    cv2.imwrite("img_cv.jpg", img)
-    cv2.waitKey()
+    str_encode = cv2.imencode('.jpg', img)[1].tobytes()
+    base64_str = base64.b64encode(str_encode)
+    return base64_str
 
 
 def create_qr(test):

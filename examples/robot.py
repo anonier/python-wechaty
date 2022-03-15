@@ -85,12 +85,11 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
-                y = x.index('查单') + 1
-                try:
-                    insurance = x[y]
-                except:
-                    insurance = None
-                if insurance is None or len(insurance) == 0 or not_car_number(license_plate, insurance):
+                if len(x) != 3:
+                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
+                    return
+                insurance = [a for a in x if '查单' not in a and '@' not in a]
+                if len(insurance) == 0 or not_car_number(license_plate, insurance[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
                 await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
@@ -100,7 +99,7 @@ class MyBot(Wechaty):
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
-                        'licenseId': insurance,
+                        'licenseId': insurance[0],
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -140,7 +139,7 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 请查看' + insurance + '的电子保单文件!')
+                        await conversation.say('@' + msg.talker().name + ' 请查看' + insurance[0] + '的电子保单文件!')
                         for key, value in response_dict['data'].items():
                             file_box = FileBox.from_url(
                                 value,
@@ -184,13 +183,16 @@ class MyBot(Wechaty):
                                 str([a for a in x if '乘客' in a]))
                             accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
                                 str([a for a in x if '意外' in a]))
-                    elif len(x) > 4 <= 6:
+                    elif len(x) == 6:
                         jqInsurance = 'true'
                         csInsurance = 'true'
                         szInsurance = get_number(str([a for a in x if '三者' in a]))
                         driver = get_number(str([a for a in x if '司机' in a]))
                         passenger = get_number(str([a for a in x if '乘客' in a]))
                         accident = None
+                    else:
+                        await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
+                        return
                 elif '进阶' in insurance[0]:
                     if len(x) == 4:
                         if len([a for a in x if '-商业' in a]) != 0:

@@ -29,12 +29,14 @@ from wechaty import (
 )
 from wechaty_puppet import get_logger
 
+from examples.task import task
+
 logger = get_logger(__name__)
 
 
 async def main() -> None:
     """doc"""
-    bot = MyBot()
+    bot = MyBot().use(task())
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
     os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
@@ -309,7 +311,7 @@ class MyBot(Wechaty):
                                 + [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0][
                                     'premium'] + '元 。代收车船税'
                                 + data['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
-                            await create_pic(response_dict)
+                            create_pic(data)
                             file_box = FileBox.from_file(
                                 'img_cv.jpg',
                                 name='img_cv.jpg')
@@ -521,12 +523,11 @@ license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋�
 frame = "[A-HJ-NPR-Z\d]{17}$"
 
 
-def create_pic(res_dict):
+def create_pic(data):
     img_cv = cv2.imread('img.jpg')
     font = ImageFont.truetype("微软雅黑.ttc", 10)
     img_pil = Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(img_pil)
-    data = json.loads(res_dict['data'])
     # 车牌号
     draw.text((100, 158), data['plateNumber'], font=font, fill=(0, 0, 0))
     # 被保险人
@@ -581,6 +582,9 @@ def create_pic(res_dict):
     # 保单费用合计
     draw.text((503, 744), data['totalPremium'] + '元', font=font, fill=(0, 0, 0))
     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
+    # img_encode = cv2.imencode('.jpg', img)
+    # str_encode = img_encode[1].tostring()
+    # return BytesIO(str_encode)
     cv2.imwrite("img_cv.jpg", img)
     cv2.waitKey()
 

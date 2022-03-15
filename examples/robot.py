@@ -276,42 +276,53 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到用户数据!")
                             return
                     elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 本车客户风险等级:' + res_dict['data'][
-                            'customerRiskRating'] + '; 车系风险等级:' + res_dict['data'][
-                                                   'familyGrade'] + '; 无赔系数:*; 自主定价系数:' +
-                                               res_dict['data']['rateProduct'] + '。')
                         await conversation.say(
-                            '@' + msg.talker().name + ' ' + res_dict['data'][
-                                'ownerName'] + '，您好！您的爱车' + res_dict['data'][
-                                'plateNumber'] + '预计估价共计' + res_dict['data']['totalPremium'] + '元，其中交强险' +
-                            res_dict['data'][
-                                'compulsoryPremium'] + '元， 商业险' + res_dict['data'][
+                            '@' + msg.talker().name + ' 本车客户风险等级:' + json.loads(response_dict['data'])[
+                                'customerRiskRating'] + '; 车系风险等级:' + json.loads(response_dict['data'])[
+                                'familyGrade'] + '; 无赔系数:' + json.loads(response_dict['data'])[
+                                'unattendGrade'] + '; 自主定价系数:' +
+                            json.loads(response_dict['data'])['rateProduct'] + '。')
+                        await conversation.say(
+                            '@' + msg.talker().name + ' ' + json.loads(response_dict['data'])[
+                                'ownerName'] + '，您好！您的爱车' + json.loads(response_dict['data'])[
+                                'plateNumber'] + '预计估价共计' + json.loads(response_dict['data'])[
+                                'totalPremium'] + '元，其中交强险' +
+                            json.loads(response_dict['data'])[
+                                'compulsoryPremium'] + '元， 商业险' + json.loads(response_dict['data'])[
                                 'businessPremium'] + '元。商业险明细：车损保额'
-                            + [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0][
+                            + [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                               "车损" in a['name']][0][
                                 'amount']
                             + '元，保费' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0][
+                            [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                             "车损" in a['name']][0][
                                 'premium']
                             + '元 ；三者保额' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
+                            [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                             "三者" in a['name']][0][
                                 'amount']
                             + '元，保费' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
+                            [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                             "三者" in a['name']][0][
                                 'premium']
                             + '元 ；司机保额' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                            [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                             "司机" in a['name']][0][
                                 'amount']
                             + '元，保费' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                            [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                             "司机" in a['name']][0][
                                 'premium']
                             + '元；乘客保额' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
+                            [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                             "乘客" in a['name']][0][
                                 'amount']
                             + '元，保费' +
-                            [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
+                            [a for a in json.loads(response_dict['data'])['policyBusinessCategoryList'] if
+                             "乘客" in a['name']][0][
                                 'premium']
-                            + '元 。代收车船税' + res_dict['data']['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
-                        create_pic(res_dict)
+                            + '元 。代收车船税' + json.loads(response_dict['data'])['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
+                        create_pic(response_dict)
                         file_box = FileBox.from_file(
                             'img_cv.jpg',
                             name='img_cv.jpg')
@@ -526,44 +537,55 @@ def create_pic(res_dict):
     img_pil = Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(img_pil)
     # 车牌号
-    draw.text((100, 158), res_dict['data']['plateNumber'], font=font, fill=(0, 0, 0))
+    draw.text((100, 158), json.loads(res_dict['data'])['plateNumber'], font=font, fill=(0, 0, 0))
     # 被保险人
-    draw.text((492, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
+    draw.text((492, 158), json.loads(res_dict['data'])['theInsured'], font=font, fill=(0, 0, 0))
     # 行驶证车主
-    draw.text((492, 183), res_dict['data']['ownerName'], font=font, fill=(0, 0, 0))
+    draw.text((492, 183), json.loads(res_dict['data'])['ownerName'], font=font, fill=(0, 0, 0))
     # 厂牌车型
-    draw.text((100, 183), res_dict['data']['carBrand'], font=font, fill=(0, 0, 0))
+    draw.text((100, 183), json.loads(res_dict['data'])['carBrand'], font=font, fill=(0, 0, 0))
     # 核定载客
-    draw.text((492, 210), res_dict['data']['limitLoadPerson'] + '人', font=font, fill=(0, 0, 0))
+    draw.text((492, 210), json.loads(res_dict['data'])['limitLoadPerson'] + '人', font=font, fill=(0, 0, 0))
     # 使用性质
-    draw.text((100, 210), res_dict['data']['usage'], font=font, fill=(0, 0, 0))
+    draw.text((100, 210), json.loads(res_dict['data'])['usage'], font=font, fill=(0, 0, 0))
     # 交强险保修期限
-    draw.text((178, 247), res_dict['data']['compulsoryStartTime'] + '至' + res_dict['data']['compulsoryEndTime'],
+    draw.text((178, 247), json.loads(res_dict['data'])['compulsoryStartTime'] + '至' + json.loads(res_dict['data'])[
+        'compulsoryEndTime'],
               font=font, fill=(0, 0, 0))
     # 商业险保修期限
-    draw.text((178, 274), res_dict['data']['businessStartTime'] + '至' + res_dict['data']['businessEndTime'], font=font,
+    draw.text((178, 274),
+              json.loads(res_dict['data'])['businessStartTime'] + '至' + json.loads(res_dict['data'])['businessEndTime'],
+              font=font,
               fill=(0, 0, 0))
     # 机动车损失保险
-    draw.text((328, 414), [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0]['amount'],
+    draw.text((328, 414),
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "车损" in a['name']][0]['amount'],
               font=font, fill=(0, 0, 0))
     draw.text((501, 414),
-              [a for a in res_dict['data']['policyBusinessCategoryList'] if "车损" in a['name']][0]['premium'], font=font,
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "车损" in a['name']][0][
+                  'premium'], font=font,
               fill=(0, 0, 0))
     # 机动车第三者责任保险
-    draw.text((328, 445), [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
-        'amount'], font=font, fill=(0, 0, 0))
-    draw.text((501, 445), [a for a in res_dict['data']['policyBusinessCategoryList'] if "三者" in a['name']][0][
-        'premium'], font=font, fill=(0, 0, 0))
+    draw.text((328, 445),
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "三者" in a['name']][0][
+                  'amount'], font=font, fill=(0, 0, 0))
+    draw.text((501, 445),
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "三者" in a['name']][0][
+                  'premium'], font=font, fill=(0, 0, 0))
     # 司机
-    draw.text((328, 475), [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
-        'amount'], font=font, fill=(0, 0, 0))
-    draw.text((501, 475), [a for a in res_dict['data']['policyBusinessCategoryList'] if "司机" in a['name']][0][
-        'premium'], font=font, fill=(0, 0, 0))
+    draw.text((328, 475),
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                  'amount'], font=font, fill=(0, 0, 0))
+    draw.text((501, 475),
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "司机" in a['name']][0][
+                  'premium'], font=font, fill=(0, 0, 0))
     # 乘客
-    draw.text((328, 505), [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
-        'amount'], font=font, fill=(0, 0, 0))
-    draw.text((501, 505), [a for a in res_dict['data']['policyBusinessCategoryList'] if "乘客" in a['name']][0][
-        'premium'], font=font, fill=(0, 0, 0))
+    draw.text((328, 505),
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "乘客" in a['name']][0][
+                  'amount'], font=font, fill=(0, 0, 0))
+    draw.text((501, 505),
+              [a for a in json.loads(res_dict['data'])['policyBusinessCategoryList'] if "乘客" in a['name']][0][
+                  'premium'], font=font, fill=(0, 0, 0))
     # # 道路救援
     # draw.text((328, 534), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
     # draw.text((501, 534), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
@@ -574,13 +596,13 @@ def create_pic(res_dict):
     # draw.text((328, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
     # draw.text((501, 158), res_dict['data']['theInsured'], font=font, fill=(0, 0, 0))
     # 商业险合计
-    draw.text((503, 654), res_dict['data']['businessPremium'] + '元', font=font, fill=(0, 0, 0))
+    draw.text((503, 654), json.loads(res_dict['data'])['businessPremium'] + '元', font=font, fill=(0, 0, 0))
     # 交强险合计
-    draw.text((503, 684), res_dict['data']['compulsoryPremium'] + '元', font=font, fill=(0, 0, 0))
+    draw.text((503, 684), json.loads(res_dict['data'])['compulsoryPremium'] + '元', font=font, fill=(0, 0, 0))
     # 车船税
-    draw.text((503, 714), res_dict['data']['taxPremium'] + '元', font=font, fill=(0, 0, 0))
+    draw.text((503, 714), json.loads(res_dict['data'])['taxPremium'] + '元', font=font, fill=(0, 0, 0))
     # 保单费用合计
-    draw.text((503, 744), res_dict['data']['totalPremium'] + '元', font=font, fill=(0, 0, 0))
+    draw.text((503, 744), json.loads(res_dict['data'])['totalPremium'] + '元', font=font, fill=(0, 0, 0))
     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
     cv2.imwrite("img_cv.jpg", img)
     cv2.waitKey()

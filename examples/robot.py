@@ -87,20 +87,24 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
-                if len(x) != 3:
+                if len(x) != 4:
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                insurance = [a for a in x if '查单' not in a and '@' not in a]
+                insurance = [a for a in x if '查单' not in a and '@' not in a and '业务员' not in a]
                 if len(insurance) == 0 or not_car_number(license_plate, insurance[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
                 await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
+                man_cmd = [a for a in x if '业务员' in a][0]
+                salesman = man_cmd.split(':')[1] if len([a for a in x if '业务员' in a and ':' in a]) != 0 else \
+                    man_cmd.split('：')[1]
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': roomId,
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
+                        'salesman': salesman,
                         'licenseId': insurance[0],
                         'appKey': "X08ASKYS"
                     },

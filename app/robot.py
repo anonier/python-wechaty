@@ -82,7 +82,7 @@ class MyBot(Wechaty):
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
-                if '报价' in text or '出单' in text or '录单' in text or len(x) != 4 or len(man_cmd) == 0 \
+                if '报价' in text or '录单' in text or len(x) != 4 or len(man_cmd) == 0 \
                     or (':' not in man_cmd and '：' not in man_cmd):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
@@ -155,7 +155,7 @@ class MyBot(Wechaty):
                 x = text.split()
                 insurance_cmd = [a for a in x if '基本' in a or '进阶' in a]
                 man_cmd = [a for a in x if '业务员' in a]
-                if '查单' in text or '出单' in text or '录单' in text or len(x) != 5 or len(x) != 7 or len(man_cmd) == 0 \
+                if '查单' in text or '录单' in text or (len(x) != 5 and len(x) != 7) or len(man_cmd) == 0 \
                     or len(insurance_cmd) == 0 or len(insurance_cmd) > 1 or (':' not in man_cmd and '：' not in man_cmd):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
@@ -406,7 +406,7 @@ class MyBot(Wechaty):
                 man_cmd = [a for a in x if '业务员' in a]
                 date_cmd = [a for a in x if '日期' in a]
                 phone_cmd = [a for a in x if '手机' in a]
-                if '报价' in text or '出单' in text or '查单' in text or len(x) != 5 or len(man_cmd) == 0 \
+                if '报价' in text or '查单' in text or len(x) != 5 or len(man_cmd) == 0 \
                     or len(date_cmd) == 0 or len(phone_cmd) == 0 \
                     or (':' not in man_cmd and '：' not in man_cmd) \
                     or (':' not in date_cmd and '：' not in date_cmd) \

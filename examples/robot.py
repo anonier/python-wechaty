@@ -29,14 +29,14 @@ from wechaty import (
 )
 from wechaty_puppet import get_logger
 
-from task import task
+from task import Task
 
 logger = get_logger(__name__)
 
 
 async def main() -> None:
     """doc"""
-    bot = MyBot().use(task())
+    bot = MyBot().use(Task())
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
     os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
@@ -68,13 +68,13 @@ class MyBot(Wechaty):
         contactId = from_contact.contact_id
         text: str = msg.text()
         room: Optional[Room] = msg.room()
-        roomId = room.room_id
+        room_id = room.room_id
         msg_type: MessageType = msg.type()
         # file_box: Optional[FileBox] = None'
 
         ip = 'http://192.168.1.111/'
 
-        if room.room_id == '25398111924@chatroom':
+        if '25398111924@chatroom' == room_id:
             if '@AI出单' in text and '查单' not in text and '报价' not in text:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
@@ -100,7 +100,7 @@ class MyBot(Wechaty):
                     man_cmd.split('：')[1]
                 multipart_encoder = MultipartEncoder(
                     fields={
-                        'roomId': roomId,
+                        'roomId': room_id,
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
@@ -243,7 +243,7 @@ class MyBot(Wechaty):
                 await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
-                        'roomId': roomId,
+                        'roomId': room_id,
                         'contactId': contactId,
                         'operator': "2",
                         'cmdName': text,
@@ -356,7 +356,7 @@ class MyBot(Wechaty):
                     man_cmd.split('：')[1]
                 multipart_encoder = MultipartEncoder(
                     fields={
-                        'roomId': roomId,
+                        'roomId': room_id,
                         'contactId': contactId,
                         'operator': "1",
                         'cmdName': text,
@@ -420,7 +420,7 @@ class MyBot(Wechaty):
                 url = ip + 'api/RobotApi/imgUpload.do'
                 multipart_encoder = MultipartEncoder(
                     fields={
-                        'roomId': roomId,
+                        'roomId': room_id,
                         'contactId': contactId,
                         'path': '/img/robotOrder',
                         'storageServer': 'FASTDFS',

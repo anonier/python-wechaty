@@ -43,6 +43,9 @@ async def main() -> None:
     await bot.start()
 
 
+ip = 'http://192.168.1.111/'
+
+
 class MyBot(Wechaty):
     """
     listen wechaty event with inherited functions, which is more friendly for
@@ -59,31 +62,25 @@ class MyBot(Wechaty):
         """listen for on-ready event"""
         logger.info('ready event %s...', payload)
 
-    # pylint: disable=R0912,R0914,R0915
     async def on_message(self, msg: Message) -> None:
         """
         listen for message event
         """
         from_contact: Contact = msg.talker()
-        contactId = from_contact.contact_id
+        contact_id = from_contact.contact_id
         text: str = msg.text()
         room: Optional[Room] = msg.room()
         room_id = room.room_id
         msg_type: MessageType = msg.type()
-        # file_box: Optional[FileBox] = None'
-
-        ip = 'http://192.168.1.111/'
 
         if '25398111924@chatroom' == room_id:
             if '@AI出单' in text and '查单' not in text and '报价' not in text:
-                conversation: Union[
-                    Room, Contact] = from_contact if room is None else room
+                conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')
 
             elif '@AI出单' in text and '查单' in text:
-                conversation: Union[
-                    Room, Contact] = from_contact if room is None else room
+                conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
@@ -101,7 +98,7 @@ class MyBot(Wechaty):
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
-                        'contactId': contactId,
+                        'contactId': contact_id,
                         'operator': "1",
                         'cmdName': text,
                         'salesman': salesman,
@@ -155,8 +152,7 @@ class MyBot(Wechaty):
                     num = num + 1
 
             elif '@AI出单' in text and '报价' in text:
-                conversation: Union[
-                    Room, Contact] = from_contact if room is None else room
+                conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/declaration.do'
                 x = text.split()
@@ -244,7 +240,7 @@ class MyBot(Wechaty):
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
-                        'contactId': contactId,
+                        'contactId': contact_id,
                         'operator': "2",
                         'cmdName': text,
                         'appKey': "X08ASKYS",
@@ -337,8 +333,7 @@ class MyBot(Wechaty):
                     num = num + 1
 
             elif '@AI出单' in text and '出单' in text:
-                conversation: Union[
-                    Room, Contact] = from_contact if room is None else room
+                conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
@@ -356,7 +351,7 @@ class MyBot(Wechaty):
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
-                        'contactId': contactId,
+                        'contactId': contact_id,
                         'operator': "1",
                         'cmdName': text,
                         'salesman': salesman,
@@ -406,7 +401,7 @@ class MyBot(Wechaty):
                         #         value,
                         #         name=key)
                         #     await conversation.say(file_box)
-                        # return
+                        return
                     num = num + 1
 
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
@@ -420,7 +415,7 @@ class MyBot(Wechaty):
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
-                        'contactId': contactId,
+                        'contactId': contact_id,
                         'path': '/img/robotOrder',
                         'storageServer': 'FASTDFS',
                         'file': (str(int(time.time())) + '.jpg', BytesIO(hd_file_box.stream), 'image/jpeg'),
@@ -429,7 +424,7 @@ class MyBot(Wechaty):
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers)
+                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])

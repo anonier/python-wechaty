@@ -326,10 +326,9 @@ class MyBot(Wechaty):
                                 + [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0][
                                     'premium'] + '元 。代收车船税'
                                 + data['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
-                            img = create_pic(data)
-                            file_box = FileBox.from_base64(
-                                img,
-                                name='img.jpg')
+                            file_box = FileBox.from_url(
+                                response_dict['data'][''],
+                                name=response_dict['data'][''])
                             await conversation.say(file_box)
                             return
                         except:
@@ -402,12 +401,12 @@ class MyBot(Wechaty):
                             return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + insurance[0] + '的电子保单文件!')
-                        for key, value in json.loads(response_dict['data']).items():
-                            file_box = FileBox.from_url(
-                                value,
-                                name=key)
-                            await conversation.say(file_box)
-                        return
+                        # for key, value in json.loads(response_dict['data']).items():
+                        #     file_box = FileBox.from_url(
+                        #         value,
+                        #         name=key)
+                        #     await conversation.say(file_box)
+                        # return
                     num = num + 1
 
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:

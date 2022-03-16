@@ -24,7 +24,7 @@ class Task(WechatyPlugin):
         multipart_encoder = MultipartEncoder(
             fields={
                 'roomId': room_id,
-                'operator': "4",
+                'operator': "5",
                 'appKey': "X08ASKYS"
             },
             boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))

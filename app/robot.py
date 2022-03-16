@@ -10,10 +10,7 @@ from datetime import datetime
 from io import BytesIO
 from typing import List, Optional, Union
 
-import cv2
-import numpy as np
 import requests
-from PIL import ImageFont, Image, ImageDraw
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from wechaty import (
     MessageType,
@@ -74,7 +71,7 @@ class MyBot(Wechaty):
         msg_type: MessageType = msg.type()
 
         if '25398111924@chatroom' == room_id:
-            if '@AI出单' in text and '查单' not in text and '报价' not in text:
+            if '@AI出单' in text and '查单' not in text and '报价' not in text and '出单' not in text and '录单' not in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')
@@ -84,17 +81,16 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
-                if len(x) != 4:
+                man_cmd = [a for a in x if '业务员' in a]
+                if len(x) != 4 or len(man_cmd) == 0 or (':' not in man_cmd and '：' not in man_cmd):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                insurance = [a for a in x if '查单' not in a and '@' not in a and '业务员' not in a]
-                if len(insurance) == 0 or not_car_number(license_plate, insurance[0]):
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
+                car_licence = [a for a in x if '出单' not in a and '@' not in a and '业务员' not in a]
+                if len(car_licence) == 0 or not_car_number(license_plate, car_licence[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
                 await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
-                man_cmd = [a for a in x if '业务员' in a][0]
-                salesman = man_cmd.split(':')[1] if len([a for a in x if '业务员' in a and ':' in a]) != 0 else \
-                    man_cmd.split('：')[1]
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
@@ -102,7 +98,7 @@ class MyBot(Wechaty):
                         'operator': "1",
                         'cmdName': text,
                         'salesman': salesman,
-                        'licenseId': insurance[0],
+                        'licenseId': car_licence[0],
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -142,7 +138,7 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 请查看' + insurance[0] + '的电子保单文件!')
+                        await conversation.say('@' + msg.talker().name + ' 请查看' + car_licence[0] + '的电子保单文件!')
                         for key, value in json.loads(response_dict['data']).items():
                             file_box = FileBox.from_url(
                                 value,
@@ -156,14 +152,15 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 url = ip + 'api/RobotApi/declaration.do'
                 x = text.split()
-                insurance = [a for a in x if '基本' in a or '进阶' in a]
-                if len(insurance) == 0:
-                    await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
+                insurance_cmd = [a for a in x if '基本' in a or '进阶' in a]
+                man_cmd = [a for a in x if '业务员' in a]
+                if len(x) != 5 or len(x) != 7 or len(man_cmd) == 0 or len(insurance_cmd) == 0 \
+                    or len(insurance_cmd) > 1 or (':' not in man_cmd and '：' not in man_cmd):
+                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                if '基本' in insurance[0]:
-                    man_cmd = [a for a in x if '业务员' in a][0]
-                    salesman = man_cmd.split(':')[1] if len([a for a in x if '业务员' in a and ':' in a]) != 0 else \
-                        man_cmd.split('：')[1]
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
+                insurance = insurance_cmd[0]
+                if '基本' in insurance:
                     if len(x) == 5:
                         if len([a for a in x if '-商业' in a]) != 0:
                             jqInsurance = 'true'
@@ -198,10 +195,7 @@ class MyBot(Wechaty):
                     else:
                         await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
                         return
-                elif '进阶' in insurance[0]:
-                    man_cmd = [a for a in x if '业务员' in a][0]
-                    salesman = man_cmd.split(':')[1] if len([a for a in x if '业务员' in a and ':' in a]) != 0 else \
-                        man_cmd.split('：')[1]
+                elif '进阶' in insurance:
                     if len(x) == 5:
                         if len([a for a in x if '-商业' in a]) != 0:
                             jqInsurance = 'true'
@@ -323,8 +317,8 @@ class MyBot(Wechaty):
                                     'premium'] + '元 。代收车船税'
                                 + data['taxPremium'] + '元。此报价仅供参考，最终价格以出单为准。')
                             file_box = FileBox.from_url(
-                                response_dict['data'][''],
-                                name=response_dict['data'][''])
+                                data['url'],
+                                name='policy.jpg')
                             await conversation.say(file_box)
                             return
                         except:
@@ -337,25 +331,24 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
-                if len(x) != 4:
+                man_cmd = [a for a in x if '业务员' in a]
+                car_licence = [a for a in x if '出单' not in a and '@' not in a and '业务员' not in a]
+                if len(x) != 4 or len(man_cmd) == 0 or (':' not in man_cmd and '：' not in man_cmd):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                insurance = [a for a in x if '查单' not in a and '@' not in a and '业务员' not in a]
-                if len(insurance) == 0 or not_car_number(license_plate, insurance[0]):
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
+                if len(car_licence) == 0 or not_car_number(license_plate, car_licence[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
                 await conversation.say('@' + msg.talker().name + " 收到出单指令,数据处理中请稍后!")
-                man_cmd = [a for a in x if '业务员' in a][0]
-                salesman = man_cmd.split(':')[1] if len([a for a in x if '业务员' in a and ':' in a]) != 0 else \
-                    man_cmd.split('：')[1]
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
                         'contactId': contact_id,
-                        'operator': "1",
+                        'operator': "3",
                         'cmdName': text,
                         'salesman': salesman,
-                        'licenseId': insurance[0],
+                        'licenseId': car_licence[0],
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -395,12 +388,81 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 请查看' + insurance[0] + '的电子保单文件!')
-                        # for key, value in json.loads(response_dict['data']).items():
-                        #     file_box = FileBox.from_url(
-                        #         value,
-                        #         name=key)
-                        #     await conversation.say(file_box)
+                        await conversation.say('@' + msg.talker().name + ' 已完成出单!')
+                        file_box = FileBox.from_url(
+                            response_dict['data']['url'],
+                            name='qr.jpg')
+                        await conversation.say(file_box)
+                        return
+                    num = num + 1
+
+            elif '@AI出单' in text and '录单' in text:
+                conversation: Union[Room, Contact] = from_contact if room is None else room
+                await conversation.ready()
+                url = ip + 'api/RobotApi/policy.do'
+                x = text.split()
+                man_cmd = [a for a in x if '业务员' in a]
+                date_cmd = [a for a in x if '日期' in a]
+                phone_cmd = [a for a in x if '手机' in a]
+                if len(x) != 5 or len(man_cmd) == 0 or len(date_cmd) == 0 or len(phone_cmd) == 0 \
+                    or (':' not in man_cmd and '：' not in man_cmd) \
+                    or (':' not in date_cmd and '：' not in date_cmd) \
+                    or (':' not in phone_cmd and '：' not in phone_cmd):
+                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
+                    return
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
+                date = date_cmd[0].split(':')[1] if ':' in date_cmd else date_cmd[0].split('：')[1]
+                phone = phone_cmd[0].split(':')[1] if ':' in phone_cmd else phone_cmd[0].split('：')[1]
+                await conversation.say('@' + msg.talker().name + " 收到录单指令,数据处理中请稍后!")
+                multipart_encoder = MultipartEncoder(
+                    fields={
+                        'roomId': room_id,
+                        'contactId': contact_id,
+                        'operator': "4",
+                        'cmdName': text,
+                        'salesman': salesman,
+                        'date': date,
+                        'phone': phone,
+                        'appKey': "X08ASKYS"
+                    },
+                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                )
+                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                try:
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                except:
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                    return
+                res_dict = json.loads(response.text)
+                if not res_dict['success']:
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                    return
+                num = 0
+                second = sleep_time(0, 0, 3)
+                while True:
+                    time.sleep(second)
+                    url = ip + 'api/RobotApi/pullPolicy.do'
+                    multipart_encoder = MultipartEncoder(
+                        fields={
+                            'uuid': res_dict['data'],
+                            'appKey': "X08ASKYS"
+                        },
+                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                    )
+                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                    try:
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    except:
+                        if num == 3:
+                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                            return
+                    response_dict = json.loads(response.text)
+                    if not response_dict['success']:
+                        if num == 3:
+                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                            return
+                    elif response_dict['success']:
+                        await conversation.say('@' + msg.talker().name + ' 已完成录单!')
                         return
                     num = num + 1
 
@@ -605,77 +667,77 @@ license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋�
 frame = "[A-HJ-NPR-Z\d]{17}$"
 
 
-def create_pic(data):
-    img_cv = cv2.imread('img.jpg')
-    font = ImageFont.truetype("微软雅黑.ttc", 10)
-    img_pil = Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
-    draw = ImageDraw.Draw(img_pil)
-    # 车牌号
-    draw.text((100, 158), data['plateNumber'], font=font, fill=(0, 0, 0))
-    # 被保险人
-    draw.text((492, 158), data['theInsured'], font=font, fill=(0, 0, 0))
-    # 行驶证车主
-    draw.text((492, 183), data['ownerName'], font=font, fill=(0, 0, 0))
-    # 厂牌车型
-    draw.text((100, 183), data['carBrand'], font=font, fill=(0, 0, 0))
-    # 核定载客
-    draw.text((492, 210), data['limitLoadPerson'] + '人', font=font, fill=(0, 0, 0))
-    # 使用性质
-    draw.text((100, 210), data['usage'], font=font, fill=(0, 0, 0))
-    # 交强险保修期限
-    draw.text((178, 247), data['compulsoryStartTime'] + '至' + data['compulsoryEndTime'], font=font, fill=(0, 0, 0))
-    # 商业险保修期限
-    draw.text((178, 274), data['businessStartTime'] + '至' + data['businessEndTime'], font=font, fill=(0, 0, 0))
-    # 机动车损失保险
-    draw.text((328, 414), [a for a in data['policyBusinessCategoryList'] if "车损" in a['name']][0]['amount'], font=font,
-              fill=(0, 0, 0))
-    draw.text((501, 414), [a for a in data['policyBusinessCategoryList'] if "车损" in a['name']][0]['premium'], font=font,
-              fill=(0, 0, 0))
-    # 机动车第三者责任保险
-    draw.text((328, 445), [a for a in data['policyBusinessCategoryList'] if "三者" in a['name']][0]['amount'], font=font,
-              fill=(0, 0, 0))
-    draw.text((501, 445), [a for a in data['policyBusinessCategoryList'] if "三者" in a['name']][0]['premium'], font=font,
-              fill=(0, 0, 0))
-    # 司机
-    draw.text((328, 475), [a for a in data['policyBusinessCategoryList'] if "司机" in a['name']][0]['amount'], font=font,
-              fill=(0, 0, 0))
-    draw.text((501, 475), [a for a in data['policyBusinessCategoryList'] if "司机" in a['name']][0]['premium'], font=font,
-              fill=(0, 0, 0))
-    # 乘客
-    draw.text((328, 505), [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0]['amount'], font=font,
-              fill=(0, 0, 0))
-    draw.text((501, 505), [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0]['premium'], font=font,
-              fill=(0, 0, 0))
-    # 道路救援
-    draw.text((328, 534),
-              [a for a in data['policyBusinessCategoryList'] if "道路救援" in a['name']][0]['serviceTimes'] + '次',
-              font=font, fill=(0, 0, 0))
-    draw.text((501, 534), [a for a in data['policyBusinessCategoryList'] if "道路救援" in a['name']][0]['premium'],
-              font=font, fill=(0, 0, 0))
-    # 代为驾驶
-    draw.text((328, 564),
-              [a for a in data['policyBusinessCategoryList'] if "代为驾驶" in a['name']][0]['serviceTimes'] + '次',
-              font=font, fill=(0, 0, 0))
-    draw.text((501, 564), [a for a in data['policyBusinessCategoryList'] if "代为驾驶" in a['name']][0]['premium'],
-              font=font, fill=(0, 0, 0))
-    # 代为送检
-    draw.text((328, 594),
-              [a for a in data['policyBusinessCategoryList'] if "代为送检" in a['name']][0]['serviceTimes'] + '次',
-              font=font, fill=(0, 0, 0))
-    draw.text((501, 594), [a for a in data['policyBusinessCategoryList'] if "代为送检" in a['name']][0]['premium'],
-              font=font, fill=(0, 0, 0))
-    # 商业险合计
-    draw.text((503, 654), data['businessPremium'] + '元', font=font, fill=(0, 0, 0))
-    # 交强险合计
-    draw.text((503, 684), data['compulsoryPremium'] + '元', font=font, fill=(0, 0, 0))
-    # 车船税
-    draw.text((503, 714), data['taxPremium'] + '元', font=font, fill=(0, 0, 0))
-    # 保单费用合计
-    draw.text((503, 744), data['totalPremium'] + '元', font=font, fill=(0, 0, 0))
-    img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
-    str_encode = cv2.imencode('.jpg', img)[1].tobytes()
-    base64_str = base64.b64encode(str_encode)
-    return base64_str
+# def create_pic(data):
+#     img_cv = cv2.imread('img.jpg')
+#     font = ImageFont.truetype("微软雅黑.ttc", 10)
+#     img_pil = Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
+#     draw = ImageDraw.Draw(img_pil)
+#     # 车牌号
+#     draw.text((100, 158), data['plateNumber'], font=font, fill=(0, 0, 0))
+#     # 被保险人
+#     draw.text((492, 158), data['theInsured'], font=font, fill=(0, 0, 0))
+#     # 行驶证车主
+#     draw.text((492, 183), data['ownerName'], font=font, fill=(0, 0, 0))
+#     # 厂牌车型
+#     draw.text((100, 183), data['carBrand'], font=font, fill=(0, 0, 0))
+#     # 核定载客
+#     draw.text((492, 210), data['limitLoadPerson'] + '人', font=font, fill=(0, 0, 0))
+#     # 使用性质
+#     draw.text((100, 210), data['usage'], font=font, fill=(0, 0, 0))
+#     # 交强险保修期限
+#     draw.text((178, 247), data['compulsoryStartTime'] + '至' + data['compulsoryEndTime'], font=font, fill=(0, 0, 0))
+#     # 商业险保修期限
+#     draw.text((178, 274), data['businessStartTime'] + '至' + data['businessEndTime'], font=font, fill=(0, 0, 0))
+#     # 机动车损失保险
+#     draw.text((328, 414), [a for a in data['policyBusinessCategoryList'] if "车损" in a['name']][0]['amount'], font=font,
+#               fill=(0, 0, 0))
+#     draw.text((501, 414), [a for a in data['policyBusinessCategoryList'] if "车损" in a['name']][0]['premium'], font=font,
+#               fill=(0, 0, 0))
+#     # 机动车第三者责任保险
+#     draw.text((328, 445), [a for a in data['policyBusinessCategoryList'] if "三者" in a['name']][0]['amount'], font=font,
+#               fill=(0, 0, 0))
+#     draw.text((501, 445), [a for a in data['policyBusinessCategoryList'] if "三者" in a['name']][0]['premium'], font=font,
+#               fill=(0, 0, 0))
+#     # 司机
+#     draw.text((328, 475), [a for a in data['policyBusinessCategoryList'] if "司机" in a['name']][0]['amount'], font=font,
+#               fill=(0, 0, 0))
+#     draw.text((501, 475), [a for a in data['policyBusinessCategoryList'] if "司机" in a['name']][0]['premium'], font=font,
+#               fill=(0, 0, 0))
+#     # 乘客
+#     draw.text((328, 505), [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0]['amount'], font=font,
+#               fill=(0, 0, 0))
+#     draw.text((501, 505), [a for a in data['policyBusinessCategoryList'] if "乘客" in a['name']][0]['premium'], font=font,
+#               fill=(0, 0, 0))
+#     # 道路救援
+#     draw.text((328, 534),
+#               [a for a in data['policyBusinessCategoryList'] if "道路救援" in a['name']][0]['serviceTimes'] + '次',
+#               font=font, fill=(0, 0, 0))
+#     draw.text((501, 534), [a for a in data['policyBusinessCategoryList'] if "道路救援" in a['name']][0]['premium'],
+#               font=font, fill=(0, 0, 0))
+#     # 代为驾驶
+#     draw.text((328, 564),
+#               [a for a in data['policyBusinessCategoryList'] if "代为驾驶" in a['name']][0]['serviceTimes'] + '次',
+#               font=font, fill=(0, 0, 0))
+#     draw.text((501, 564), [a for a in data['policyBusinessCategoryList'] if "代为驾驶" in a['name']][0]['premium'],
+#               font=font, fill=(0, 0, 0))
+#     # 代为送检
+#     draw.text((328, 594),
+#               [a for a in data['policyBusinessCategoryList'] if "代为送检" in a['name']][0]['serviceTimes'] + '次',
+#               font=font, fill=(0, 0, 0))
+#     draw.text((501, 594), [a for a in data['policyBusinessCategoryList'] if "代为送检" in a['name']][0]['premium'],
+#               font=font, fill=(0, 0, 0))
+#     # 商业险合计
+#     draw.text((503, 654), data['businessPremium'] + '元', font=font, fill=(0, 0, 0))
+#     # 交强险合计
+#     draw.text((503, 684), data['compulsoryPremium'] + '元', font=font, fill=(0, 0, 0))
+#     # 车船税
+#     draw.text((503, 714), data['taxPremium'] + '元', font=font, fill=(0, 0, 0))
+#     # 保单费用合计
+#     draw.text((503, 744), data['totalPremium'] + '元', font=font, fill=(0, 0, 0))
+#     img = cv2.cvtColor(np.asarray(img_pil), cv2.COLOR_RGB2BGR)
+#     str_encode = cv2.imencode('.jpg', img)[1].tobytes()
+#     base64_str = base64.b64encode(str_encode)
+#     return base64_str
 
 
 def create_qr(test):

@@ -82,15 +82,16 @@ class MyBot(Wechaty):
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
-                if '报价' in text or '录单' in text or len(x) != 4 or len(man_cmd) == 0 \
-                    or (':' not in man_cmd and '：' not in man_cmd):
+                if '报价' in text or text.count('出单') > 1 or '录单' in text or len(x) != 4 or len(man_cmd) == 0 \
+                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
-                car_licence = [a for a in x if '出单' not in a and '@' not in a and '业务员' not in a]
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
+                car_licence = [a for a in x if '出单' not in a and '查单' not in a and '@' not in a and '业务员' not in a]
                 if len(car_licence) == 0 or not_car_number(license_plate, car_licence[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
+                car_licence = car_licence[0]
                 await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
@@ -99,7 +100,7 @@ class MyBot(Wechaty):
                         'operator': "1",
                         'cmdName': text,
                         'salesman': salesman,
-                        'licenseId': car_licence[0],
+                        'licenseId': car_licence,
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -153,14 +154,16 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 url = ip + 'api/RobotApi/declaration.do'
                 x = text.split()
-                insurance_cmd = [a for a in x if '基本' in a or '进阶' in a]
+                insurance_cmd = [a for a in x if '险种' in a]
                 man_cmd = [a for a in x if '业务员' in a]
-                if '查单' in text or '录单' in text or (len(x) != 5 and len(x) != 7) or len(man_cmd) == 0 \
-                    or len(insurance_cmd) == 0 or len(insurance_cmd) > 1 or (':' not in man_cmd and '：' not in man_cmd):
+                if '查单' in text or text.count('出单') > 1 or '录单' in text or (len(x) != 5 and len(x) != 7) \
+                    or len(man_cmd) == 0 or len(insurance_cmd) == 0 or len(insurance_cmd) > 1 \
+                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
-                insurance = insurance_cmd[0]
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
+                insurance = insurance_cmd[0].split(':')[1] if ':' in insurance_cmd[0] else insurance_cmd[0].split('：')[
+                    1]
                 if '基本' in insurance:
                     if len(x) == 5:
                         if len([a for a in x if '-商业' in a]) != 0:
@@ -231,6 +234,9 @@ class MyBot(Wechaty):
                     else:
                         await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
                         return
+                szInsurance = szInsurance[0]
+                driver = driver[0]
+                passenger = passenger[0]
                 await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
@@ -241,10 +247,10 @@ class MyBot(Wechaty):
                         'appKey': "X08ASKYS",
                         'jqInsurance': jqInsurance,
                         'csInsurance': csInsurance,
-                        'szInsurance': szInsurance[0],
+                        'szInsurance': szInsurance,
                         'salesman': salesman,
-                        'driver': driver[0],
-                        'passenger': passenger[0],
+                        'driver': driver,
+                        'passenger': passenger,
                         'accident': None if accident is None else '*'.join(accident)
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -333,15 +339,16 @@ class MyBot(Wechaty):
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
-                car_licence = [a for a in x if '出单' not in a and '@' not in a and '业务员' not in a]
                 if '报价' in text or '查单' in text or '录单' in text or len(x) != 4 or len(man_cmd) == 0 \
-                    or (':' not in man_cmd and '：' not in man_cmd):
+                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
+                car_licence = [a for a in x if '出单' not in a and '@' not in a and '业务员' not in a]
                 if len(car_licence) == 0 or not_car_number(license_plate, car_licence[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
                     return
+                car_licence = car_licence[0]
                 await conversation.say('@' + msg.talker().name + " 收到出单指令,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
@@ -350,7 +357,7 @@ class MyBot(Wechaty):
                         'operator': "3",
                         'cmdName': text,
                         'salesman': salesman,
-                        'licenseId': car_licence[0],
+                        'licenseId': car_licence,
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -406,16 +413,16 @@ class MyBot(Wechaty):
                 man_cmd = [a for a in x if '业务员' in a]
                 date_cmd = [a for a in x if '日期' in a]
                 phone_cmd = [a for a in x if '手机' in a]
-                if '报价' in text or '查单' in text or len(x) != 5 or len(man_cmd) == 0 \
+                if '报价' in text or text.count('出单') > 1 or '查单' in text or len(x) != 5 or len(man_cmd) == 0 \
                     or len(date_cmd) == 0 or len(phone_cmd) == 0 \
-                    or (':' not in man_cmd and '：' not in man_cmd) \
+                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]) \
                     or (':' not in date_cmd and '：' not in date_cmd) \
                     or (':' not in phone_cmd and '：' not in phone_cmd):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd else man_cmd[0].split('：')[1]
-                date = date_cmd[0].split(':')[1] if ':' in date_cmd else date_cmd[0].split('：')[1]
-                phone = phone_cmd[0].split(':')[1] if ':' in phone_cmd else phone_cmd[0].split('：')[1]
+                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
+                date = date_cmd[0].split(':')[1] if ':' in date_cmd[0] else date_cmd[0].split('：')[1]
+                phone = phone_cmd[0].split(':')[1] if ':' in phone_cmd[0] else phone_cmd[0].split('：')[1]
                 await conversation.say('@' + msg.talker().name + " 收到录单指令,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={

@@ -139,7 +139,7 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 请查看' + car_licence[0] + '的电子保单文件!')
+                        await conversation.say('@' + msg.talker().name + ' 请查看' + car_licence + '的电子保单文件!')
                         for key, value in json.loads(response_dict['data']).items():
                             file_box = FileBox.from_url(
                                 value,

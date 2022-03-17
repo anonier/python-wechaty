@@ -76,14 +76,13 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')
 
-            elif '@AI出单' in text and '查单' in text:
+            elif '@AI出单' in text and '查单' in text and '报价' not in text and text.count('出单') == 1 and '录单' not in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
-                if '报价' in text or text.count('出单') > 1 or '录单' in text or len(x) != 4 or len(man_cmd) == 0 \
-                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
+                if len(x) != 4 or len(man_cmd) == 0 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
                 salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
@@ -149,16 +148,15 @@ class MyBot(Wechaty):
                         return
                     num = num + 1
 
-            elif '@AI出单' in text and '报价' in text:
+            elif '@AI出单' in text and '报价' in text and '查单' not in text and text.count('出单') == 1 and '录单' not in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/declaration.do'
                 x = text.split()
                 insurance_cmd = [a for a in x if '险种' in a]
                 man_cmd = [a for a in x if '业务员' in a]
-                if '查单' in text or text.count('出单') > 1 or '录单' in text or (len(x) != 5 and len(x) != 7) \
-                    or len(man_cmd) == 0 or len(insurance_cmd) == 0 or len(insurance_cmd) > 1 \
-                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
+                if (len(x) != 5 and len(x) != 7) or len(man_cmd) == 0 or len(insurance_cmd) == 0 \
+                    or len(insurance_cmd) > 1 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
                 salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
@@ -333,14 +331,14 @@ class MyBot(Wechaty):
                             return
                     num = num + 1
 
-            elif '@AI出单' in text and '出单' in text:
+            elif '@AI出单' in text and text.count(
+                '出单') == 2 and '查单' not in text and '报价' not in text and '录单' not in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
-                if '报价' in text or '查单' in text or '录单' in text or len(x) != 4 or len(man_cmd) == 0 \
-                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
+                if len(x) != 4 or len(man_cmd) == 0 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
                 salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
@@ -405,7 +403,7 @@ class MyBot(Wechaty):
                         return
                     num = num + 1
 
-            elif '@AI出单' in text and '录单' in text:
+            elif '@AI出单' in text and '录单' in text and '查单' not in text and '报价' not in text and text.count('出单') == 1:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
@@ -413,15 +411,19 @@ class MyBot(Wechaty):
                 man_cmd = [a for a in x if '业务员' in a]
                 date_cmd = [a for a in x if '日期' in a]
                 phone_cmd = [a for a in x if '手机' in a]
-                if '报价' in text or text.count('出单') > 1 or '查单' in text or len(x) != 5 or len(man_cmd) == 0 \
-                    or len(date_cmd) == 0 or len(phone_cmd) == 0 \
+                if len(x) != 5 or len(man_cmd) == 0 or len(date_cmd) == 0 or len(phone_cmd) == 0 \
                     or (':' not in man_cmd[0] and '：' not in man_cmd[0]) \
-                    or (':' not in date_cmd and '：' not in date_cmd) \
-                    or (':' not in phone_cmd and '：' not in phone_cmd):
+                    or (':' not in date_cmd[0] and '：' not in date_cmd[0]) \
+                    or (':' not in phone_cmd[0] and '：' not in phone_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
                 salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
-                date = date_cmd[0].split(':')[1] if ':' in date_cmd[0] else date_cmd[0].split('：')[1]
+                two_date = date_cmd[0].split(':')[1] if ':' in date_cmd[0] else date_cmd[0].split('：')[1]
+                date = two_date.split(',') if ',' in two_date else two_date.split('，')
+                for i in range(len(date)):
+                    date[i] = '20' + date[i]
+                    if '同步' in date[i]:
+                        date[i] = date[i - 1]
                 phone = phone_cmd[0].split(':')[1] if ':' in phone_cmd[0] else phone_cmd[0].split('：')[1]
                 await conversation.say('@' + msg.talker().name + " 收到录单指令,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
@@ -431,7 +433,8 @@ class MyBot(Wechaty):
                         'operator': "4",
                         'cmdName': text,
                         'salesman': salesman,
-                        'date': date,
+                        'date1': date[0],
+                        'date2': date[1],
                         'phone': phone,
                         'appKey': "X08ASKYS"
                     },

@@ -100,7 +100,8 @@ class MyBot(Wechaty):
                         'cmdName': text,
                         'salesman': salesman,
                         'licenseId': car_licence,
-                        'appKey': "X08ASKYS"
+                        'appKey': "X08ASKYS",
+                        'name': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -249,7 +250,8 @@ class MyBot(Wechaty):
                         'salesman': salesman,
                         'driver': driver,
                         'passenger': passenger,
-                        'accident': None if accident is None else '*'.join(accident)
+                        'accident': None if accident is None else '*'.join(accident),
+                        'name': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -356,7 +358,8 @@ class MyBot(Wechaty):
                         'cmdName': text,
                         'salesman': salesman,
                         'licenseId': car_licence,
-                        'appKey': "X08ASKYS"
+                        'appKey': "X08ASKYS",
+                        'name': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -438,7 +441,8 @@ class MyBot(Wechaty):
                         'date1': date[0],
                         'date2': date[1],
                         'phone': phone,
-                        'appKey': "X08ASKYS"
+                        'appKey': "X08ASKYS",
+                        'name': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )

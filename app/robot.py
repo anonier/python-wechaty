@@ -396,6 +396,8 @@ class MyBot(Wechaty):
                             return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 已完成出单!')
+                        qr = FileBox.from_base64(open("qr.txt", "rb").read(), "qr.img")
+                        await conversation.say(qr)
                         file_box = FileBox.from_url(
                             response_dict['data']['url'],
                             name='qr.jpg')

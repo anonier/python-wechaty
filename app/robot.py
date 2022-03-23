@@ -37,6 +37,7 @@ async def main() -> None:
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
     os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
+    # os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '127.0.0.1:8788'
     await bot.start()
 
 
@@ -101,7 +102,7 @@ class MyBot(Wechaty):
                         'salesman': salesman,
                         'licenseId': car_licence,
                         'appKey': "X08ASKYS",
-                        'name': msg.talker().name
+                        'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -112,11 +113,11 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                if res_dict['errorCode'] != "":
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
                     return
                 num = 0
-                second = sleep_time(0, 0, 3)
+                second = sleep_time(0, 0, 5)
                 while True:
                     time.sleep(second)
                     url = ip + 'api/RobotApi/pullPolicy.do'
@@ -131,12 +132,12 @@ class MyBot(Wechaty):
                     try:
                         response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
-                        if num == 3:
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
-                    if not response_dict['success']:
-                        if num == 3:
+                    if res_dict['errorCode'] != "":
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
@@ -251,7 +252,7 @@ class MyBot(Wechaty):
                         'driver': driver,
                         'passenger': passenger,
                         'accident': None if accident is None else '*'.join(accident),
-                        'name': msg.talker().name
+                        'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -262,11 +263,11 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 res_dict = json.loads(response.text)
-                if not res_dict['success']:
+                if res_dict['errorCode'] != "":
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
                     return
                 num = 0
-                second = sleep_time(0, 0, 3)
+                second = sleep_time(0, 0, 5)
                 while True:
                     time.sleep(second)
                     url = ip + 'api/RobotApi/pullPolicy.do'
@@ -281,12 +282,12 @@ class MyBot(Wechaty):
                     try:
                         response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
-                        if num == 3:
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
-                    if not response_dict['success']:
-                        if num == 3:
+                    if res_dict['errorCode'] != "":
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
@@ -359,7 +360,7 @@ class MyBot(Wechaty):
                         'salesman': salesman,
                         'licenseId': car_licence,
                         'appKey': "X08ASKYS",
-                        'name': msg.talker().name
+                        'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -370,8 +371,8 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                if res_dict['errorCode'] != "":
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
                     return
                 num = 0
                 second = sleep_time(0, 0, 5)
@@ -393,7 +394,7 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
-                    if not response_dict['success']:
+                    if res_dict['errorCode'] != "":
                         if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
@@ -442,7 +443,7 @@ class MyBot(Wechaty):
                         'date2': date[1],
                         'phone': phone,
                         'appKey': "X08ASKYS",
-                        'name': msg.talker().name
+                        'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -457,7 +458,7 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 num = 0
-                second = sleep_time(0, 0, 3)
+                second = sleep_time(0, 0, 5)
                 while True:
                     time.sleep(second)
                     url = ip + 'api/RobotApi/pullPolicy.do'
@@ -472,12 +473,12 @@ class MyBot(Wechaty):
                     try:
                         response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
-                        if num == 3:
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
                     if not response_dict['success']:
-                        if num == 3:
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:

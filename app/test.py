@@ -6,19 +6,27 @@ class ListNode:
 
 class Solution:
     def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
-        a, b, c = [], "", ""
-        b += str(l1.val)
-        c += str(l2.val)
+        b = l1.val
+        c = l2.val
+        l = 10
         while l1.next:
-            b += str(l1.next.val)
-            l1 = l1.next
-        while l2.next:
-            c += str(l2.next.val)
-            l2 = l2.next
-        b = reversed(b)
-        c = reversed(c)
-        a = str(b) + str(c)
-        return a
+            if l1.next is None:
+                b += l1.next.val * l
+                l1 = l1.next
+            if l2.next is None:
+                c += l2.next.val * l
+                l2 = l2.next
+            l *= l
+        a = b + c
+        root = ListNode(a % 10)
+        a = int(a / 10)
+        top = root
+        while a >= 1:
+            d = ListNode(a % 10)
+            a = int(a / 10)
+            top.next = d
+            top = top.next
+        return root
 
 
 if __name__ == '__main__':

@@ -136,10 +136,12 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
-                    if res_dict['errorCode'] != "":
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
+                    if response_dict['errorCode'] != "":
+                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
+                        return
+                    if num == 6:
+                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                        return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + car_licence + '的电子保单文件!')
                         for key, value in json.loads(response_dict['data']).items():
@@ -286,10 +288,12 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
-                    if res_dict['errorCode'] != "":
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
+                    if response_dict['errorCode'] != "":
+                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
+                        return
+                    if num == 6:
+                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                        return
                     elif response_dict['success']:
                         try:
                             data = json.loads(response_dict['data'])
@@ -394,10 +398,12 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
-                    if res_dict['errorCode'] != "":
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
+                    if response_dict['errorCode'] != "":
+                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
+                        return
+                    if num == 6:
+                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                        return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 已完成出单!')
                         qr = FileBox.from_base64(open("qr.txt", "rb").read(), "qr.jpg")
@@ -477,10 +483,12 @@ class MyBot(Wechaty):
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
-                    if not response_dict['success']:
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
+                    if response_dict['errorCode'] != "":
+                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
+                        return
+                    if num == 6:
+                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                        return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 已完成录单!')
                         return

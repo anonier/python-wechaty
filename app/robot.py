@@ -107,7 +107,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
@@ -129,7 +129,7 @@ class MyBot(Wechaty):
                     )
                     headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                     try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
                         if num == 3:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
@@ -257,7 +257,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
@@ -279,7 +279,7 @@ class MyBot(Wechaty):
                     )
                     headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                     try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
                         if num == 3:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
@@ -337,7 +337,7 @@ class MyBot(Wechaty):
                 '出单') == 2 and '查单' not in text and '报价' not in text and '录单' not in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
-                url = ip + 'api/RobotApi/policy.do'
+                url = ip + 'api/RobotApi/issuing.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
                 if len(x) != 4 or len(man_cmd) == 0 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
@@ -365,7 +365,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
@@ -374,7 +374,7 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 num = 0
-                second = sleep_time(0, 0, 3)
+                second = sleep_time(0, 0, 5)
                 while True:
                     time.sleep(second)
                     url = ip + 'api/RobotApi/pullPolicy.do'
@@ -387,22 +387,22 @@ class MyBot(Wechaty):
                     )
                     headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                     try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
-                        if num == 3:
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     response_dict = json.loads(response.text)
                     if not response_dict['success']:
-                        if num == 3:
+                        if num == 6:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                             return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 已完成出单!')
-                        qr = FileBox.from_base64(open("qr.txt", "rb").read(), "qr.img")
+                        qr = FileBox.from_base64(open("qr.txt", "rb").read(), "qr.jpg")
                         await conversation.say(qr)
-                        file_box = FileBox.from_url(
-                            response_dict['data']['url'],
+                        file_box = FileBox.from_base64(
+                            str.encode(str(response_dict['data']).split(',')[1]),
                             name='qr.jpg')
                         await conversation.say(file_box)
                         return
@@ -448,7 +448,7 @@ class MyBot(Wechaty):
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                 try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 except:
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
@@ -470,7 +470,7 @@ class MyBot(Wechaty):
                     )
                     headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
                     try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
                         if num == 3:
                             await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
@@ -505,7 +505,7 @@ class MyBot(Wechaty):
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
                 headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=10)
+                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 res_dict = json.loads(response.text)
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])

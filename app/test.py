@@ -5,35 +5,32 @@ class ListNode:
 
 
 class Solution:
-    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
-        b = l1.val
-        c = l2.val
-        l = 10
-        while l1.next:
-            if l1.next is None:
-                b += l1.next.val * l
-                l1 = l1.next
-            if l2.next is None:
-                c += l2.next.val * l
-                l2 = l2.next
-            l *= l
-        a = b + c
-        root = ListNode(a % 10)
-        a = int(a / 10)
-        top = root
-        while a >= 1:
-            d = ListNode(a % 10)
-            a = int(a / 10)
-            top.next = d
-            top = top.next
-        return root
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        a, b = [], []
+        for i, j in enumerate(s):
+            if len(b) <= 0:
+                b.append(j)
+            else:
+                try:
+                    b.index(j)
+                    for y in range(len(b)):
+                        try:
+                            b[y:].index(j)
+                            if y == len(b) - 1:
+                                a = b
+                                b = [j]
+                            continue
+                        except:
+                            if len(b) > len(a):
+                                a = b
+                            b = b[y:]
+                            break
+
+                except:
+                    b.append(j)
+
+        return len(b) if len(b) > len(a) else len(a)
 
 
 if __name__ == '__main__':
-    a = ListNode(2)
-    a.next = ListNode(4)
-    a.next.next = ListNode(3)
-    b = ListNode(5)
-    b.next = ListNode(6)
-    b.next.next = ListNode(4)
-    print(Solution.addTwoNumbers(Solution, a, b))
+    print(Solution.lengthOfLongestSubstring(Solution, "abcabcbb"))

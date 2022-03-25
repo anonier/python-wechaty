@@ -37,7 +37,6 @@ async def main() -> None:
     os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = '28cf22af-5fa6-4912-9dba-1e4c034de38f'
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
     os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
-    # os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '127.0.0.1:8788'
     await bot.start()
 
 
@@ -72,7 +71,7 @@ class MyBot(Wechaty):
         msg_type: MessageType = msg.type()
 
         if '25398111924@chatroom' == room_id:
-            if '@AI出单' in text and '查单' not in text and '报价' not in text and '出单' not in text and '录单' not in text:
+            if '@AI出单' in text and '查单' not in text and '报价' not in text and text.count('出单') == 1 and '录单' not in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')

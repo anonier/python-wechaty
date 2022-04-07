@@ -39,7 +39,7 @@ async def main() -> None:
     await bot.start()
 
 
-ip = 'http://127.0.0.1/'
+ip = 'http://192.168.1.111/'
 
 
 class MyBot(Wechaty):
@@ -624,12 +624,7 @@ class MyBot(Wechaty):
                 assert isinstance(talker, Contact)
 
         elif "21121012651@chatroom" == room.room_id:
-            if '@AI出单' in text and '查单' not in text and '报价' not in text and text.count('出单') == 1 and '录单' not in text:
-                conversation: Union[Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')
-
-            elif '@AI出单' in text and '查单' in text and '报价' not in text and text.count('出单') == 1 and '录单' not in text:
+            if '@AI出单' in text and '查单' in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
@@ -704,7 +699,7 @@ class MyBot(Wechaty):
                         return
                     num = num + 1
 
-            elif '@AI出单' in text and '报价' in text and '查单' not in text and text.count('出单') == 1 and '录单' not in text:
+            elif '@AI出单' in text and '报价' in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/declaration.do'
@@ -890,8 +885,7 @@ class MyBot(Wechaty):
                             return
                     num = num + 1
 
-            elif '@AI出单' in text and text.count(
-                '出单') == 2 and '查单' not in text and '报价' not in text and '录单' not in text:
+            elif '@AI出单' in text and text.count('出单') == 2 and '批量出单' not in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/issuing.do'
@@ -967,7 +961,7 @@ class MyBot(Wechaty):
                         return
                     num = num + 1
 
-            elif '@AI出单' in text and '录单' in text and '查单' not in text and '报价' not in text and text.count('出单') == 1:
+            elif '@AI出单' in text and '录单' in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
@@ -1046,6 +1040,72 @@ class MyBot(Wechaty):
                         return
                     num = num + 1
 
+            elif '@AI出单' in text and '批量出单' in text:
+                conversation: Union[
+                    Room, Contact] = from_contact if room is None else room
+                await conversation.ready()
+                url = ip + 'api/RobotApi/wycPolicy.do'
+                multipart_encoder = MultipartEncoder(
+                    fields={
+                        'roomId': room_id,
+                        'contactId': contact_id,
+                        'cmdName': text,
+                        'appKey': "X08ASKYS"
+                    },
+                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                )
+                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                res_dict = json.loads(response.text)
+                if not res_dict['success']:
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                try:
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                except:
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                    return
+                res_dict = json.loads(response.text)
+                if res_dict['errorCode'] != "":
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                    return
+                num = 0
+                second = sleep_time(0, 0, 5)
+                while True:
+                    time.sleep(second)
+                    url = ip + 'api/RobotApi/pullPolicy.do'
+                    multipart_encoder = MultipartEncoder(
+                        fields={
+                            'uuid': res_dict['data'],
+                            'appKey': "X08ASKYS"
+                        },
+                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                    )
+                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                    try:
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                    except:
+                        if num == 6:
+                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                            return
+                    response_dict = json.loads(response.text)
+                    if response_dict['errorCode'] != "":
+                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
+                        return
+                    if num == 6:
+                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                        return
+                    elif response_dict['success']:
+                        try:
+                            data = json.loads(response_dict['data'])
+                            file_box = FileBox.from_url(
+                                data['url'],
+                                name='policy.jpg')
+                            await conversation.say(file_box)
+                            return
+                        except:
+                            await conversation.say('@' + msg.talker().name + " 批量出单失败，请手动操作！")
+                            return
+                    num = num + 1
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
@@ -1078,17 +1138,16 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 logger.info('receving file ...')
                 file_box = await msg.to_file_box()
-                url = ip + 'api/RobotApi/wycPolicy.do'
+                url = ip + 'api/RobotApi/imgUpload.do'
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
                         'operator': "6",
-                        'cmdName': text,
                         'nickname': msg.talker().name,
                         'contactId': contact_id,
                         'path': '/img/robotOrder',
                         'storageServer': 'FASTDFS',
-                        'excelFile': (
+                        'file': (
                             str(int(time.time())) + '.xlsx', BytesIO(file_box.stream), 'application/vnd.ms-excel'),
                         'appKey': "X08ASKYS"
                     },

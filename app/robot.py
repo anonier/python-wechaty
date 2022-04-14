@@ -35,7 +35,6 @@ async def main() -> None:
     """doc"""
     bot = MyBot().use(Task())
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = 'a5a62f10-abe5-11ec-bc38-309c23d524bd'
     os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
     await bot.start()
 

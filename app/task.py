@@ -18,6 +18,7 @@ class Task(WechatyPlugin):
         return '定时任务'
 
     async def cmd(self):
+        # 房间一
         room_id = '25398111924@chatroom'
         room = self.bot.Room.load(room_id)
         url = ip + 'api/RobotApi/pullPolicy.do'
@@ -43,6 +44,7 @@ class Task(WechatyPlugin):
         #         value,
         #         name=key)
         #     await room.say(file_box)
+        # 房间二
 
     async def init_plugin(self, wechaty: Wechaty):
         await super().init_plugin(wechaty)

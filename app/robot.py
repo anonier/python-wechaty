@@ -39,7 +39,10 @@ async def main() -> None:
     await bot.start()
 
 
-ip = 'http://192.168.1.111/'
+# 25398111924@chatroom
+ip = 'http://192.168.1.114/'
+# 21121012651@chatroom
+ip_js = 'http://192.168.1.111/'
 
 
 class MyBot(Wechaty):
@@ -142,7 +145,7 @@ class MyBot(Wechaty):
                         return
                     elif response_dict['success']:
                         await conversation.say('@' + msg.talker().name + ' 请查看' + car_licence + '的电子保单文件!')
-                        for key, value in json.loads(response_dict['data']).items():
+                        for key, value in response_dict['data'].items():
                             file_box = FileBox.from_url(
                                 value,
                                 name=key)
@@ -294,7 +297,7 @@ class MyBot(Wechaty):
                         return
                     elif response_dict['success']:
                         try:
-                            data = json.loads(response_dict['data'])
+                            data = response_dict['data']
                             await conversation.say(
                                 '@' + msg.talker().name + ' 本车客户风险等级:'
                                 + data['customerRiskRating'] + '; 车系风险等级:'
@@ -419,298 +422,15 @@ class MyBot(Wechaty):
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
-                date_cmd = [a for a in x if '日期' in a]
                 phone_cmd = [a for a in x if '手机' in a]
-                if len(x) != 5 or len(man_cmd) == 0 or len(date_cmd) == 0 or len(phone_cmd) == 0 \
+                insurance_cmd = [a for a in x if '险种' in a]
+                if len(x) != 8 or len(man_cmd) == 0 or len(phone_cmd) == 0 \
                     or (':' not in man_cmd[0] and '：' not in man_cmd[0]) \
-                    or (':' not in date_cmd[0] and '：' not in date_cmd[0]) \
                     or (':' not in phone_cmd[0] and '：' not in phone_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
                 salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
-                two_date = date_cmd[0].split(':')[1] if ':' in date_cmd[0] else date_cmd[0].split('：')[1]
-                date = two_date.split(',') if ',' in two_date else two_date.split('，')
-                for i in range(len(date)):
-                    date[i] = '20' + date[i]
-                    if '同步' in date[i]:
-                        date[i] = date[i - 1]
                 phone = phone_cmd[0].split(':')[1] if ':' in phone_cmd[0] else phone_cmd[0].split('：')[1]
-                await conversation.say('@' + msg.talker().name + " 收到录单指令,数据处理中请稍后!")
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': room_id,
-                        'contactId': contact_id,
-                        'operator': "4",
-                        'cmdName': text,
-                        'salesman': salesman,
-                        'date1': date[0],
-                        'date2': date[1],
-                        'phone': phone,
-                        'appKey': "X08ASKYS",
-                        'nickname': msg.talker().name
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                except:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                    return
-                res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                    return
-                num = 0
-                second = sleep_time(0, 0, 5)
-                while True:
-                    time.sleep(second)
-                    url = ip + 'api/RobotApi/pullPolicy.do'
-                    multipart_encoder = MultipartEncoder(
-                        fields={
-                            'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
-                        },
-                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                    )
-                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                    try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                    except:
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
-                    response_dict = json.loads(response.text)
-                    if response_dict['errorCode'] != "":
-                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
-                        return
-                    if num == 6:
-                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                        return
-                    elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 已完成录单!')
-                        return
-                    num = num + 1
-
-            elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
-                conversation: Union[
-                    Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                logger.info('receving image file')
-                image: WeImage = msg.to_image()
-                hd_file_box: FileBox = await image.hd()
-                url = ip + 'api/RobotApi/imgUpload.do'
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': room_id,
-                        'contactId': contact_id,
-                        'path': '/img/robotOrder',
-                        'storageServer': 'FASTDFS',
-                        'file': (str(int(time.time())) + '.jpg', BytesIO(hd_file_box.stream), 'image/jpeg'),
-                        'appKey': "X08ASKYS"
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-
-            # 保存到本地
-            # await hd_file_box.to_file('/logs/robot/hd-image.jpg', overwrite=True)
-            # thumbnail_file_box: FileBox = await image.thumbnail()
-            # await thumbnail_file_box.to_file('/logs/robot/thumbnail-image.jpg', overwrite=True)
-            # artwork_file_box: FileBox = await image.artwork()
-            # await artwork_file_box.to_file('/logs/robot/artwork-image.jpg', overwrite=True)
-            # # reply the image
-            #
-            # elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT,
-            #                   MessageType.MESSAGE_TYPE_VIDEO]:
-            #     logger.info('receving file ...')
-            #     file_box = await msg.to_file_box()
-            #     if file_box:
-            #         await file_box.to_file(file_box.name)
-            #
-            # elif msg_type == MessageType.MESSAGE_TYPE_MINI_PROGRAM:
-            #     logger.info('receving mini-program ...')
-            #     mini_program: Optional[MiniProgram] = await msg.to_mini_program()
-            #     if mini_program:
-            #         await msg.say(mini_program)
-            #
-            # elif text == 'get room members' and room:
-            #     logger.info('get room members ...')
-            #     room_members: List[Contact] = await room.member_list()
-            #     names: List[str] = [
-            #         room_member.name for room_member in room_members]
-            #     await msg.say('\n'.join(names))
-            #
-            # elif text.startswith('remove room member:'):
-            #     logger.info('remove room member:')
-            #     if not room:
-            #         await msg.say('this is not room zone')
-            #         return
-            #
-            #     room_member_name = text[len('remove room member:') + 1:]
-            #
-            #     room_member: Optional[Contact] = await room.member(
-            #         query=RoomMemberQueryFilter(name=room_member_name)
-            #     )
-            #     if room_member:
-            #         if self.login_user and self.login_user.contact_id in room.payload.admin_ids:
-            #             await room.delete(room_member)
-            #         else:
-            #             await msg.say('登录用户不是该群管理员...')
-            #
-            #     else:
-            #         await msg.say(f'can not fine room member by name<{room_member_name}>')
-            # elif text.startswith('get room topic'):
-            #     logger.info('get room topic')
-            #     if room:
-            #         topic: Optional[str] = await room.topic()
-            #         if topic:
-            #             await msg.say(topic)
-            #
-            # elif text.startswith('rename room topic:'):
-            #     logger.info('rename room topic ...')
-            #     if room:
-            #         new_topic = text[len('rename room topic:') + 1:]
-            #         await msg.say(new_topic)
-            # elif text.startswith('add new friend:'):
-            #     logger.info('add new friendship ...')
-            #     identity_info = text[len('add new friend:'):]
-            #     weixin_contact: Optional[Contact] = await self.Friendship.search(weixin=identity_info)
-            #     phone_contact: Optional[Contact] = await self.Friendship.search(phone=identity_info)
-            #     contact: Optional[Contact] = weixin_contact or phone_contact
-            #     if contact:
-            #         await self.Friendship.add(contact, 'hello world ...')
-            #
-            # elif text.startswith('at me'):
-            #     if room:
-            #         talker = msg.talker()
-            #         await room.say('hello', mention_ids=[talker.contact_id])
-            #
-            # elif text.startswith('my alias'):
-            #     talker = msg.talker()
-            #     alias = await talker.alias()
-            #     await msg.say('your alias is:' + (alias or ''))
-            #
-            # elif text.startswith('set alias:'):
-            #     talker = msg.talker()
-            #     new_alias = text[len('set alias:'):]
-            #
-            #     # set your new alias
-            #     alias = await talker.alias(new_alias)
-            #     # get your new alias
-            #     alias = await talker.alias()
-            #     await msg.say('your new alias is:' + (alias or ''))
-            #
-            # elif text.startswith('find friends:'):
-            #     friend_name: str = text[len('find friends:'):]
-            #     friend = await self.Contact.find(friend_name)
-            #     if friend:
-            #         logger.info('find only one friend <%s>', friend)
-            #
-            #     friends: List[Contact] = await self.Contact.find_all(friend_name)
-            #
-            #     logger.info('find friend<%d>', len(friends))
-            #     logger.info(friends)
-
-            else:
-                pass
-
-            if msg.type() == MessageType.MESSAGE_TYPE_UNSPECIFIED:
-                talker = msg.talker()
-                assert isinstance(talker, Contact)
-
-        elif "21121012651@chatroom" == room.room_id:
-            if '@AI出单' in text and '查单' in text:
-                conversation: Union[Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                url = ip + 'api/RobotApi/policy.do'
-                x = text.split()
-                man_cmd = [a for a in x if '业务员' in a]
-                if len(x) != 4 or len(man_cmd) == 0 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
-                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
-                    return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
-                car_licence = [a for a in x if '出单' not in a and '查单' not in a and '@' not in a and '业务员' not in a]
-                if len(car_licence) == 0 or not_car_number(license_plate, car_licence[0]):
-                    await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
-                    return
-                car_licence = car_licence[0]
-                await conversation.say('@' + msg.talker().name + " 收到查单指令,识别到车辆信息,数据处理中请稍后!")
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': room_id,
-                        'contactId': contact_id,
-                        'operator': "1",
-                        'cmdName': text,
-                        'salesman': salesman,
-                        'licenseId': car_licence,
-                        'appKey': "X08ASKYS",
-                        'nickname': msg.talker().name
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                except:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                    return
-                res_dict = json.loads(response.text)
-                if res_dict['errorCode'] != "":
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-                    return
-                num = 0
-                second = sleep_time(0, 0, 5)
-                while True:
-                    time.sleep(second)
-                    url = ip + 'api/RobotApi/pullPolicy.do'
-                    multipart_encoder = MultipartEncoder(
-                        fields={
-                            'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
-                        },
-                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                    )
-                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                    try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                    except:
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
-                    response_dict = json.loads(response.text)
-                    if response_dict['errorCode'] != "":
-                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
-                        return
-                    if num == 6:
-                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                        return
-                    elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 请查看' + car_licence + '的电子保单文件!')
-                        for key, value in json.loads(response_dict['data']).items():
-                            file_box = FileBox.from_url(
-                                value,
-                                name=key)
-                            await conversation.say(file_box)
-                        return
-                    num = num + 1
-
-            elif '@AI出单' in text and '报价' in text:
-                conversation: Union[Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                url = ip + 'api/RobotApi/declaration.do'
-                x = text.split()
-                insurance_cmd = [a for a in x if '险种' in a]
-                man_cmd = [a for a in x if '业务员' in a]
-                if (len(x) != 5 and len(x) != 7) or len(man_cmd) == 0 or len(insurance_cmd) == 0 \
-                    or len(insurance_cmd) > 1 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
-                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
-                    return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
                 insurance = insurance_cmd[0].split(':')[1] if ':' in insurance_cmd[0] else insurance_cmd[0].split('：')[
                     1]
                 if '基本' in insurance:
@@ -786,21 +506,22 @@ class MyBot(Wechaty):
                 szInsurance = szInsurance[0]
                 driver = driver[0]
                 passenger = passenger[0]
-                await conversation.say('@' + msg.talker().name + " 收到报价指令,努力处理中,请稍后!")
+                await conversation.say('@' + msg.talker().name + " 收到录单指令,数据处理中请稍后!")
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
                         'contactId': contact_id,
-                        'operator': "2",
+                        'operator': "4",
                         'cmdName': text,
-                        'appKey': "X08ASKYS",
+                        'salesman': salesman,
                         'jqInsurance': jqInsurance,
                         'csInsurance': csInsurance,
                         'szInsurance': szInsurance,
-                        'salesman': salesman,
                         'driver': driver,
                         'passenger': passenger,
                         'accident': None if accident is None else '*'.join(accident),
+                        'phone': phone,
+                        'appKey': "X08ASKYS",
                         'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -812,9 +533,10 @@ class MyBot(Wechaty):
                     await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
                 res_dict = json.loads(response.text)
-                if res_dict['errorCode'] != "":
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                if not res_dict['success']:
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
                     return
+                await conversation.say('@' + msg.talker().name + ' 已完成录单!')
                 num = 0
                 second = sleep_time(0, 0, 5)
                 while True:
@@ -843,7 +565,7 @@ class MyBot(Wechaty):
                         return
                     elif response_dict['success']:
                         try:
-                            data = json.loads(response_dict['data'])
+                            data = response_dict['data']
                             await conversation.say(
                                 '@' + msg.talker().name + ' 本车客户风险等级:'
                                 + data['customerRiskRating'] + '; 车系风险等级:'
@@ -883,229 +605,9 @@ class MyBot(Wechaty):
                         except:
                             await conversation.say('@' + msg.talker().name + " 操作报价失败，请手动操作！")
                             return
-                    num = num + 1
-
-            elif '@AI出单' in text and text.count('出单') == 2 and '批量出单' not in text:
-                conversation: Union[Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                url = ip + 'api/RobotApi/issuing.do'
-                x = text.split()
-                man_cmd = [a for a in x if '业务员' in a]
-                if len(x) < 4 or len(x) > 5 or len(man_cmd) == 0 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
-                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
-                    return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
-                car_licence = [a for a in x if '出单' not in a and '@' not in a and '业务员' not in a]
-                if len(car_licence) == 0 or not_car_number(license_plate, car_licence[0]):
-                    await conversation.say('@' + msg.talker().name + " 未识别到车辆信息,请核对信息!")
-                    return
-                car_licence = car_licence[0]
-                await conversation.say('@' + msg.talker().name + " 收到出单指令,数据处理中请稍后!")
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': room_id,
-                        'contactId': contact_id,
-                        'operator': "3",
-                        'cmdName': text,
-                        'salesman': salesman,
-                        'licenseId': car_licence,
-                        'appKey': "X08ASKYS",
-                        'nickname': msg.talker().name
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                except:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                    return
-                res_dict = json.loads(response.text)
-                if res_dict['errorCode'] != "":
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-                    return
-                num = 0
-                second = sleep_time(0, 0, 5)
-                while True:
-                    time.sleep(second)
-                    url = ip + 'api/RobotApi/pullPolicy.do'
-                    multipart_encoder = MultipartEncoder(
-                        fields={
-                            'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
-                        },
-                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                    )
-                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                    try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                    except:
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
-                    response_dict = json.loads(response.text)
-                    if response_dict['errorCode'] != "":
-                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
-                        return
-                    if num == 6:
-                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                        return
-                    elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 已完成出单!')
-                        qr = FileBox.from_base64(open("qr.txt", "rb").read(), "qr.jpg")
-                        await conversation.say(qr)
-                        file_box = FileBox.from_base64(
-                            str.encode(str(response_dict['data']).split(',')[1]),
-                            name='qr.jpg')
-                        await conversation.say(file_box)
                         return
                     num = num + 1
 
-            elif '@AI出单' in text and '录单' in text:
-                conversation: Union[Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                url = ip + 'api/RobotApi/policy.do'
-                x = text.split()
-                man_cmd = [a for a in x if '业务员' in a]
-                date_cmd = [a for a in x if '日期' in a]
-                phone_cmd = [a for a in x if '手机' in a]
-                if len(x) != 5 or len(man_cmd) == 0 or len(date_cmd) == 0 or len(phone_cmd) == 0 \
-                    or (':' not in man_cmd[0] and '：' not in man_cmd[0]) \
-                    or (':' not in date_cmd[0] and '：' not in date_cmd[0]) \
-                    or (':' not in phone_cmd[0] and '：' not in phone_cmd[0]):
-                    await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
-                    return
-                salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
-                two_date = date_cmd[0].split(':')[1] if ':' in date_cmd[0] else date_cmd[0].split('：')[1]
-                date = two_date.split(',') if ',' in two_date else two_date.split('，')
-                for i in range(len(date)):
-                    date[i] = '20' + date[i]
-                    if '同步' in date[i]:
-                        date[i] = date[i - 1]
-                phone = phone_cmd[0].split(':')[1] if ':' in phone_cmd[0] else phone_cmd[0].split('：')[1]
-                await conversation.say('@' + msg.talker().name + " 收到录单指令,数据处理中请稍后!")
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': room_id,
-                        'contactId': contact_id,
-                        'operator': "4",
-                        'cmdName': text,
-                        'salesman': salesman,
-                        'date1': date[0],
-                        'date2': date[1],
-                        'phone': phone,
-                        'appKey': "X08ASKYS",
-                        'nickname': msg.talker().name
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                except:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                    return
-                res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                    return
-                num = 0
-                second = sleep_time(0, 0, 5)
-                while True:
-                    time.sleep(second)
-                    url = ip + 'api/RobotApi/pullPolicy.do'
-                    multipart_encoder = MultipartEncoder(
-                        fields={
-                            'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
-                        },
-                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                    )
-                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                    try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                    except:
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
-                    response_dict = json.loads(response.text)
-                    if response_dict['errorCode'] != "":
-                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
-                        return
-                    if num == 6:
-                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                        return
-                    elif response_dict['success']:
-                        await conversation.say('@' + msg.talker().name + ' 已完成录单!')
-                        return
-                    num = num + 1
-
-            elif '@AI出单' in text and '批量出单' in text:
-                conversation: Union[
-                    Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                url = ip + 'api/RobotApi/wycPolicy.do'
-                multipart_encoder = MultipartEncoder(
-                    fields={
-                        'roomId': room_id,
-                        'contactId': contact_id,
-                        'cmdName': text,
-                        'appKey': "X08ASKYS"
-                    },
-                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                )
-                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                res_dict = json.loads(response.text)
-                if not res_dict['success']:
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-                try:
-                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                except:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                    return
-                res_dict = json.loads(response.text)
-                if res_dict['errorCode'] != "":
-                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
-                    return
-                num = 0
-                second = sleep_time(0, 0, 5)
-                while True:
-                    time.sleep(second)
-                    url = ip + 'api/RobotApi/pullPolicy.do'
-                    multipart_encoder = MultipartEncoder(
-                        fields={
-                            'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
-                        },
-                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                    )
-                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                    try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                    except:
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                            return
-                    response_dict = json.loads(response.text)
-                    if response_dict['errorCode'] != "":
-                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
-                        return
-                    if num == 6:
-                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
-                        return
-                    elif response_dict['success']:
-                        try:
-                            data = json.loads(response_dict['data'])
-                            file_box = FileBox.from_url(
-                                data['url'],
-                                name='policy.jpg')
-                            await conversation.say(file_box)
-                            return
-                        except:
-                            await conversation.say('@' + msg.talker().name + " 批量出单失败，请手动操作！")
-                            return
-                    num = num + 1
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
@@ -1131,24 +633,94 @@ class MyBot(Wechaty):
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
 
-            elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT,
-                              MessageType.MESSAGE_TYPE_VIDEO]:
+            else:
+                pass
+
+            if msg.type() == MessageType.MESSAGE_TYPE_UNSPECIFIED:
+                talker = msg.talker()
+                assert isinstance(talker, Contact)
+
+        elif "21121012651@chatroom" == room_id:
+            if '@AI出单' in text and '查单' in text:
+                pass
+
+            elif '@AI出单' in text and '批量出单' in text:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
-                logger.info('receving file ...')
-                file_box = await msg.to_file_box()
-                url = ip + 'api/RobotApi/imgUpload.do'
+                url = ip_js + 'api/RobotApi/wycPolicy.do'
                 multipart_encoder = MultipartEncoder(
                     fields={
                         'roomId': room_id,
-                        'operator': "6",
-                        'nickname': msg.talker().name,
+                        'contactId': contact_id,
+                        'operator': msg.talker().name,
+                        'cmdName': text,
+                        'appKey': "X08ASKYS"
+                    },
+                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                )
+                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                try:
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                except:
+                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                    return
+                res_dict = json.loads(response.text)
+                if res_dict['errorCode'] != "":
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                    return
+                num = 0
+                second = sleep_time(0, 0, 5)
+                while True:
+                    time.sleep(second)
+                    url = ip_js + 'api/RobotApi/pullPolicy.do'
+                    multipart_encoder = MultipartEncoder(
+                        fields={
+                            'uuid': res_dict['data'],
+                            'appKey': "X08ASKYS"
+                        },
+                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                    )
+                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                    try:
+                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                    except:
+                        if num == 6:
+                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                            return
+                    response_dict = json.loads(response.text)
+                    if response_dict['errorCode'] != "":
+                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
+                        return
+                    if num == 6:
+                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                        return
+                    elif response_dict['success']:
+                        try:
+                            file_box = FileBox.from_url(
+                                response_dict['data'],
+                                name='policy.xlsx')
+                            await conversation.say(file_box)
+                            return
+                        except:
+                            await conversation.say('@' + msg.talker().name + " 批量出单失败，请手动操作！")
+                            return
+                    num = num + 1
+            elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
+                conversation: Union[
+                    Room, Contact] = from_contact if room is None else room
+                await conversation.ready()
+                logger.info('receving image file')
+                image: WeImage = msg.to_image()
+                hd_file_box: FileBox = await image.hd()
+                url = ip_js + 'api/RobotApi/imgUpload.do'
+                multipart_encoder = MultipartEncoder(
+                    fields={
+                        'roomId': room_id,
                         'contactId': contact_id,
                         'path': '/img/robotOrder',
                         'storageServer': 'FASTDFS',
-                        'file': (
-                            str(int(time.time())) + '.xlsx', BytesIO(file_box.stream), 'application/vnd.ms-excel'),
+                        'file': (str(int(time.time())) + '.jpg', BytesIO(hd_file_box.stream), 'image/jpeg'),
                         'appKey': "X08ASKYS"
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -1159,102 +731,36 @@ class MyBot(Wechaty):
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
 
-                # 保存到本地
-                # if file_box:
-                #     await file_box.to_file(file_box.name)
-
-                # 保存到本地
-                # await hd_file_box.to_file('/logs/robot/hd-image.jpg', overwrite=True)
-                # thumbnail_file_box: FileBox = await image.thumbnail()
-                # await thumbnail_file_box.to_file('/logs/robot/thumbnail-image.jpg', overwrite=True)
-                # artwork_file_box: FileBox = await image.artwork()
-                # await artwork_file_box.to_file('/logs/robot/artwork-image.jpg', overwrite=True)
-                # # reply the image
-                #
-                #
-                # elif msg_type == MessageType.MESSAGE_TYPE_MINI_PROGRAM:
-                #     logger.info('receving mini-program ...')
-                #     mini_program: Optional[MiniProgram] = await msg.to_mini_program()
-                #     if mini_program:
-                #         await msg.say(mini_program)
-                #
-                # elif text == 'get room members' and room:
-                #     logger.info('get room members ...')
-                #     room_members: List[Contact] = await room.member_list()
-                #     names: List[str] = [
-                #         room_member.name for room_member in room_members]
-                #     await msg.say('\n'.join(names))
-                #
-                # elif text.startswith('remove room member:'):
-                #     logger.info('remove room member:')
-                #     if not room:
-                #         await msg.say('this is not room zone')
-                #         return
-                #
-                #     room_member_name = text[len('remove room member:') + 1:]
-                #
-                #     room_member: Optional[Contact] = await room.member(
-                #         query=RoomMemberQueryFilter(name=room_member_name)
-                #     )
-                #     if room_member:
-                #         if self.login_user and self.login_user.contact_id in room.payload.admin_ids:
-                #             await room.delete(room_member)
-                #         else:
-                #             await msg.say('登录用户不是该群管理员...')
-                #
-                #     else:
-                #         await msg.say(f'can not fine room member by name<{room_member_name}>')
-                # elif text.startswith('get room topic'):
-                #     logger.info('get room topic')
-                #     if room:
-                #         topic: Optional[str] = await room.topic()
-                #         if topic:
-                #             await msg.say(topic)
-                #
-                # elif text.startswith('rename room topic:'):
-                #     logger.info('rename room topic ...')
-                #     if room:
-                #         new_topic = text[len('rename room topic:') + 1:]
-                #         await msg.say(new_topic)
-                # elif text.startswith('add new friend:'):
-                #     logger.info('add new friendship ...')
-                #     identity_info = text[len('add new friend:'):]
-                #     weixin_contact: Optional[Contact] = await self.Friendship.search(weixin=identity_info)
-                #     phone_contact: Optional[Contact] = await self.Friendship.search(phone=identity_info)
-                #     contact: Optional[Contact] = weixin_contact or phone_contact
-                #     if contact:
-                #         await self.Friendship.add(contact, 'hello world ...')
-                #
-                # elif text.startswith('at me'):
-                #     if room:
-                #         talker = msg.talker()
-                #         await room.say('hello', mention_ids=[talker.contact_id])
-                #
-                # elif text.startswith('my alias'):
-                #     talker = msg.talker()
-                #     alias = await talker.alias()
-                #     await msg.say('your alias is:' + (alias or ''))
-                #
-                # elif text.startswith('set alias:'):
-                #     talker = msg.talker()
-                #     new_alias = text[len('set alias:'):]
-                #
-                #     # set your new alias
-                #     alias = await talker.alias(new_alias)
-                #     # get your new alias
-                #     alias = await talker.alias()
-                #     await msg.say('your new alias is:' + (alias or ''))
-                #
-                # elif text.startswith('find friends:'):
-                #     friend_name: str = text[len('find friends:'):]
-                #     friend = await self.Contact.find(friend_name)
-                #     if friend:
-                #         logger.info('find only one friend <%s>', friend)
-                #
-                #     friends: List[Contact] = await self.Contact.find_all(friend_name)
-                #
-                #     logger.info('find friend<%d>', len(friends))
-                #     logger.info(friends)
+            elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT,
+                              MessageType.MESSAGE_TYPE_VIDEO]:
+                conversation: Union[
+                    Room, Contact] = from_contact if room is None else room
+                await conversation.ready()
+                logger.info('receving file:' + 'test')
+                file_box = await msg.to_file_box()
+                url = ip_js + 'api/RobotApi/imgUpload.do'
+                multipart_encoder = MultipartEncoder(
+                    fields={
+                        'roomId': room_id,
+                        'operator': "6",
+                        'nickname': msg.talker().name,
+                        'contactId': contact_id,
+                        'path': '/img/robotOrder',
+                        'storageServer': 'FASTDFS',
+                        'file': (
+                            str(int(time.time())) + '.xlsx' if file_box.name.endswith(
+                                "xlsx") else '.xls', BytesIO(file_box.stream),
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' if file_box.name.endswith(
+                                "xlsx") else 'application/vnd.ms-excel'),
+                        'appKey': "X08ASKYS"
+                    },
+                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                )
+                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                res_dict = json.loads(response.text)
+                if not res_dict['success']:
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
 
                 else:
                     pass

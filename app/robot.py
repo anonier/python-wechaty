@@ -35,6 +35,7 @@ async def main() -> None:
     """doc"""
     bot = MyBot().use(Task())
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
+    os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = 'a5a62f10-abe5-11ec-bc38-309c23d524bd'
     os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
     await bot.start()
 
@@ -78,7 +79,7 @@ class MyBot(Wechaty):
                 await conversation.ready()
                 await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')
 
-            elif '@AI出单' in text and '查单' in text and '报价' not in text and text.count('出单') == 1 and '录单' not in text:
+            elif '@AI出单' in text and '查单' in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
@@ -153,7 +154,7 @@ class MyBot(Wechaty):
                         return
                     num = num + 1
 
-            elif '@AI出单' in text and '报价' in text and '查单' not in text and text.count('出单') == 1 and '录单' not in text:
+            elif '@AI出单' in text and '报价' in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/declaration.do'
@@ -339,8 +340,7 @@ class MyBot(Wechaty):
                             return
                     num = num + 1
 
-            elif '@AI出单' in text and text.count(
-                '出单') == 2 and '查单' not in text and '报价' not in text and '录单' not in text:
+            elif '@AI出单' in text and text.count('出单') == 2:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/issuing.do'
@@ -416,7 +416,7 @@ class MyBot(Wechaty):
                         return
                     num = num + 1
 
-            elif '@AI出单' in text and '录单' in text and '查单' not in text and '报价' not in text and text.count('出单') == 1:
+            elif '@AI出单' in text and '录单' in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
@@ -648,6 +648,7 @@ class MyBot(Wechaty):
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
+                await conversation.say('@' + msg.talker().name + " 收到指令,努力处理中请稍后!")
                 url = ip_js + 'api/RobotApi/wycPolicy.do'
                 multipart_encoder = MultipartEncoder(
                     fields={
@@ -663,7 +664,7 @@ class MyBot(Wechaty):
                 try:
                     response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                 except:
-                    await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                    await conversation.say('@' + msg.talker().name + "  抱歉，连接已断开，未查询到用户数据!")
                     return
                 res_dict = json.loads(response.text)
                 if res_dict['errorCode'] != "":
@@ -686,14 +687,14 @@ class MyBot(Wechaty):
                         response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
                     except:
                         if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                            await conversation.say('@' + msg.talker().name + " 抱歉，连接已断开，未查询到用户数据!")
                             return
                     response_dict = json.loads(response.text)
                     if response_dict['errorCode'] != "":
                         await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
                         return
                     if num == 6:
-                        await conversation.say('@' + msg.talker().name + " 未查询到客户数据!")
+                        await conversation.say('@' + msg.talker().name + " 抱歉，连接已断开，未查询到用户数据!")
                         return
                     elif response_dict['success']:
                         try:
@@ -701,11 +702,13 @@ class MyBot(Wechaty):
                                 response_dict['data'],
                                 name='policy.xlsx')
                             await conversation.say(file_box)
+                            await conversation.say('@' + msg.talker().name + ' 完成批量出单，请查收结果!')
                             return
                         except:
-                            await conversation.say('@' + msg.talker().name + " 批量出单失败，请手动操作！")
+                            await conversation.say('@' + msg.talker().name + " 批量出单失败，请手动操作!")
                             return
                     num = num + 1
+
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
@@ -731,8 +734,7 @@ class MyBot(Wechaty):
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
 
-            elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT,
-                              MessageType.MESSAGE_TYPE_VIDEO]:
+            elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT, MessageType.MESSAGE_TYPE_VIDEO]:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()

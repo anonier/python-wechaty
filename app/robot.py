@@ -35,14 +35,16 @@ async def main() -> None:
     """doc"""
     bot = MyBot().use(Task())
     os.environ['WECHATY_PUPPET'] = 'wechaty-puppet-padlocal'
-    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '192.168.1.124:8788'
+    os.environ['WECHATY_PUPPET_SERVICE_TOKEN'] = ''
+    os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '127.0.0.1:8788'
     await bot.start()
 
 
 # 25398111924@chatroom
-ip = 'http://192.168.1.114/'
+ip = ''
 # 21121012651@chatroom
-ip_js = 'http://192.168.1.111/'
+ip_js = ''
+appKey = "Q7MOS4NQ"
 
 
 class MyBot(Wechaty):
@@ -73,12 +75,7 @@ class MyBot(Wechaty):
         msg_type: MessageType = msg.type()
 
         if '25398111924@chatroom' == room_id:
-            if '@AI出单' in text and '查单' not in text and '报价' not in text and text.count('出单') == 1 and '录单' not in text:
-                conversation: Union[Room, Contact] = from_contact if room is None else room
-                await conversation.ready()
-                await conversation.say('@' + msg.talker().name + ' 未识别到指令,请核实后重新发送!')
-
-            elif '@AI出单' in text and '查单' in text:
+            if '@AI出单' in text and '查单' in text:
                 conversation: Union[Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
                 url = ip + 'api/RobotApi/policy.do'
@@ -102,7 +99,7 @@ class MyBot(Wechaty):
                         'cmdName': text,
                         'salesman': salesman,
                         'licenseId': car_licence,
-                        'appKey': "X08ASKYS",
+                        'appKey': appKey,
                         'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -125,7 +122,7 @@ class MyBot(Wechaty):
                     multipart_encoder = MultipartEncoder(
                         fields={
                             'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
+                            'appKey': appKey
                         },
                         boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                     )
@@ -160,7 +157,7 @@ class MyBot(Wechaty):
                 x = text.split()
                 insurance_cmd = [a for a in x if '险种' in a]
                 man_cmd = [a for a in x if '业务员' in a]
-                if (len(x) != 5 and len(x) != 7) or len(man_cmd) == 0 or len(insurance_cmd) == 0 \
+                if (len(x) != 5 and len(x) != 7 and len(x) != 8) or len(man_cmd) == 0 or len(insurance_cmd) == 0 \
                     or len(insurance_cmd) > 1 or (':' not in man_cmd[0] and '：' not in man_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
@@ -180,24 +177,29 @@ class MyBot(Wechaty):
                             jqInsurance = 'false' if [a for a in x if '-交强' in a] else 'true'
                             if len([a for a in x if '-车损' in a]) != 0:
                                 csInsurance = 'false'
-                            elif len([a for a in x if '车损' in a and '-' not in a]) != 0:
-                                csInsurance = get_number(a for a in x if '车损' in a)
+                            elif len([a for a in x if
+                                      '车损' in a and '-' not in a and '：' not in a and ':' not in a]) != 0:
+                                csInsurance = get_number(a for a in x if '车损' in a and '：' not in a and ':' not in a)
                             else:
                                 csInsurance = 'true'
-                            szInsurance = '100' if len([a for a in x if '三者' in a]) == 0 else get_number(
-                                str([a for a in x if '三者' in a]))
-                            driver = '1' if len([a for a in x if '司机' in a]) == 0 else get_number(
-                                str([a for a in x if '司机' in a]))
-                            passenger = '1' if len([a for a in x if '乘客' in a]) == 0 else get_number(
-                                str([a for a in x if '乘客' in a]))
-                            accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
-                                str([a for a in x if '意外' in a]))
+                            szInsurance = '100' if len(
+                                [a for a in x if '三者' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                            driver = '1' if len(
+                                [a for a in x if '司机' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                            passenger = '1' if len(
+                                [a for a in x if '乘客' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
+                            accident = None if len(
+                                [a for a in x if '意外' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '意外' in a and '：' not in a and ':' not in a]))
                     elif len(x) == 7:
                         jqInsurance = 'true'
                         csInsurance = 'true'
-                        szInsurance = get_number(str([a for a in x if '三者' in a]))
-                        driver = get_number(str([a for a in x if '司机' in a]))
-                        passenger = get_number(str([a for a in x if '乘客' in a]))
+                        szInsurance = get_number(str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                        driver = get_number(str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                        passenger = get_number(str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
                         accident = None
                     else:
                         await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
@@ -215,28 +217,40 @@ class MyBot(Wechaty):
                             jqInsurance = 'false' if [a for a in x if '-交强' in a] else 'true'
                             if len([a for a in x if '-车损' in a]) != 0:
                                 csInsurance = 'false'
-                            elif len([a for a in x if '车损' in a and '-' not in a]) != 0:
-                                csInsurance = get_number(a for a in x if '车损' in a)
+                            elif len([a for a in x if
+                                      '车损' in a and '-' not in a and '：' not in a and ':' not in a]) != 0:
+                                csInsurance = get_number(a for a in x if '车损' in a and '：' not in a and ':' not in a)
                             else:
                                 csInsurance = 'true'
-                            szInsurance = '150' if len([a for a in x if '三者' in a]) == 0 else get_number(
-                                str([a for a in x if '三者' in a]))
-                            driver = '5' if len([a for a in x if '司机' in a]) == 0 else get_number(
-                                str([a for a in x if '司机' in a]))
-                            passenger = '5' if len([a for a in x if '乘客' in a]) == 0 else get_number(
-                                str([a for a in x if '乘客' in a]))
-                            accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
-                                str([a for a in x if '意外' in a]))
+                            szInsurance = '150' if len(
+                                [a for a in x if '三者' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                            driver = '5' if len(
+                                [a for a in x if '司机' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                            passenger = '5' if len(
+                                [a for a in x if '乘客' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
+                            accident = None if len(
+                                [a for a in x if '意外' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '意外' in a and '：' not in a and ':' not in a]))
                     elif len(x) == 7:
                         jqInsurance = 'true'
                         csInsurance = 'true'
-                        szInsurance = get_number(str([a for a in x if '三者' in a]))
-                        driver = get_number(str([a for a in x if '司机' in a]))
-                        passenger = get_number(str([a for a in x if '乘客' in a]))
+                        szInsurance = get_number(str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                        driver = get_number(str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                        passenger = get_number(str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
                         accident = None
                     else:
                         await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
                         return
+                if len(x) == 8:
+                    car_licence_cmd = [a for a in x if '车牌号' in a] if len([a for a in x if '车牌号' in a]) != 0 \
+                        else [a for a in x if '车架号' in a]
+                    car_licence = car_licence_cmd[0].split(':')[1] if ':' in car_licence_cmd[0] else \
+                        car_licence_cmd[0].split('：')[1]
+                else:
+                    car_licence = None
                 szInsurance = szInsurance[0]
                 driver = driver[0]
                 passenger = passenger[0]
@@ -247,9 +261,10 @@ class MyBot(Wechaty):
                         'contactId': contact_id,
                         'operator': "2",
                         'cmdName': text,
-                        'appKey': "X08ASKYS",
+                        'appKey': appKey,
                         'jqInsurance': jqInsurance,
                         'csInsurance': csInsurance,
+                        'licenseId': car_licence,
                         'szInsurance': szInsurance,
                         'salesman': salesman,
                         'driver': driver,
@@ -277,7 +292,7 @@ class MyBot(Wechaty):
                     multipart_encoder = MultipartEncoder(
                         fields={
                             'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
+                            'appKey': appKey
                         },
                         boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                     )
@@ -315,8 +330,7 @@ class MyBot(Wechaty):
                                     'amountWy'] + '万元，保费'
                                 + [a for a in data['policyBusinessCategoryList'] if "车损" in a['name']][0][
                                     'premium'] + '元 ；三者保额'
-                                + [a for a in data['policyBusinessCategoryList'] if
-                                   "三者" in a['name']][0][
+                                + [a for a in data['policyBusinessCategoryList'] if "三者" in a['name']][0][
                                     'amountWy'] + '万元，保费'
                                 + [a for a in data['policyBusinessCategoryList'] if "三者" in a['name']][0][
                                     'premium'] + '元 ；司机保额'
@@ -363,7 +377,7 @@ class MyBot(Wechaty):
                         'cmdName': text,
                         'salesman': salesman,
                         'licenseId': car_licence,
-                        'appKey': "X08ASKYS",
+                        'appKey': appKey,
                         'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -386,7 +400,7 @@ class MyBot(Wechaty):
                     multipart_encoder = MultipartEncoder(
                         fields={
                             'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
+                            'appKey': appKey
                         },
                         boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                     )
@@ -421,17 +435,76 @@ class MyBot(Wechaty):
                 url = ip + 'api/RobotApi/policy.do'
                 x = text.split()
                 man_cmd = [a for a in x if '业务员' in a]
+                date_cmd = [a for a in x if '有效期' in a]
                 phone_cmd = [a for a in x if '手机' in a]
                 insurance_cmd = [a for a in x if '险种' in a]
-                if len(x) != 8 or len(man_cmd) == 0 or len(phone_cmd) == 0 \
+                if (len(x) != 9 and len(x) != 16) or len(man_cmd) == 0 or len(phone_cmd) == 0 \
                     or (':' not in man_cmd[0] and '：' not in man_cmd[0]) \
+                    or (':' not in date_cmd[0] and '：' not in date_cmd[0]) \
                     or (':' not in phone_cmd[0] and '：' not in phone_cmd[0]):
                     await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
                     return
+                if len(x) == 16:
+                    url = 'api/RobotApi/ourCatalogue.do'
+                    address_cmd = [a for a in x if '地址' in a]
+                    validity_period_cmd = [a for a in x if '有效期' in a]
+                    car_name_cmd = [a for a in x if '车主姓名' in a]
+                    id_card_cmd = [a for a in x if '身份证号' in a]
+                    frame_id_cmd = [a for a in x if '车架号' in a]
+                    car_licence_cmd = [a for a in x if '车牌号' in a]
+                    engine_id_cmd = [a for a in x if '发动机号' in a]
+                    first_date_cmd = [a for a in x if '初登日期' in a]
+                    model_cmd = [a for a in x if '车型' in a]
+                    if len(address_cmd) == 0 or len(validity_period_cmd) == 0 or len(car_name_cmd) == 0 \
+                        or len(id_card_cmd) == 0 or len(frame_id_cmd) == 0 or len(car_licence_cmd) == 0 \
+                        or len(engine_id_cmd) == 0 or len(first_date_cmd) == 0 or len(model_cmd) == 0 \
+                        or (':' not in address_cmd[0] and '：' not in address_cmd[0]) \
+                        or (':' not in validity_period_cmd[0] and '：' not in validity_period_cmd[0]) \
+                        or (':' not in car_name_cmd[0] and '：' not in car_name_cmd[0]) \
+                        or (':' not in id_card_cmd[0] and '：' not in id_card_cmd[0]) \
+                        or (':' not in frame_id_cmd[0] and '：' not in frame_id_cmd[0]) \
+                        or (':' not in car_licence_cmd[0] and '：' not in car_licence_cmd[0]) \
+                        or (':' not in engine_id_cmd[0] and '：' not in engine_id_cmd[0]) \
+                        or (':' not in model_cmd[0] and '：' not in model_cmd[0]) \
+                        or (':' not in first_date_cmd[0] and '：' not in first_date_cmd[0]):
+                        await conversation.say('@' + msg.talker().name + " 未识别到指令,请核实后重新发送!")
+                        return
+                    address = address_cmd[0].split(':')[1] if ':' in address_cmd[0] else address_cmd[0].split('：')[1]
+                    validity_period = validity_period_cmd[0].split(':')[1] if ':' in validity_period_cmd[0] else \
+                        validity_period_cmd[0].split('：')[1]
+                    car_name = car_name_cmd[0].split(':')[1] if ':' in car_name_cmd[0] else car_name_cmd[0].split('：')[
+                        1]
+                    id_card = id_card_cmd[0].split(':')[1] if ':' in id_card_cmd[0] else id_card_cmd[0].split('：')[1]
+                    frame_id = frame_id_cmd[0].split(':')[1] if ':' in frame_id_cmd[0] else frame_id_cmd[0].split('：')[
+                        1]
+                    car_licence = car_licence_cmd[0].split(':')[1] if ':' in car_licence_cmd[0] else \
+                        car_licence_cmd[0].split('：')[1]
+                    engine_id = engine_id_cmd[0].split(':')[1] if ':' in engine_id_cmd[0] else \
+                        engine_id_cmd[0].split('：')[1]
+                    first_date = first_date_cmd[0].split(':')[1] if ':' in first_date_cmd[0] else \
+                        first_date_cmd[0].split('：')[1]
+                    model = model_cmd[0].split(':')[1] if ':' in model_cmd[0] else \
+                        model_cmd[0].split('：')[1]
+                else:
+                    address = None
+                    validity_period = None
+                    car_name = None
+                    id_card = None
+                    frame_id = None
+                    car_licence = None
+                    engine_id = None
+                    first_date = None
+                    model = None
                 salesman = man_cmd[0].split(':')[1] if ':' in man_cmd[0] else man_cmd[0].split('：')[1]
                 phone = phone_cmd[0].split(':')[1] if ':' in phone_cmd[0] else phone_cmd[0].split('：')[1]
                 insurance = insurance_cmd[0].split(':')[1] if ':' in insurance_cmd[0] else insurance_cmd[0].split('：')[
                     1]
+                # two_date = date_cmd[0].split(':')[1] if ':' in date_cmd[0] else date_cmd[0].split('：')[1]
+                # date = two_date.split(',') if ',' in two_date else two_date.split('，')
+                # for i in range(len(date)):
+                #     date[i] = '20' + date[i]
+                #     if '同步' in date[i]:
+                #         date[i] = date[i - 1]
                 if '基本' in insurance:
                     if len(x) == 5:
                         if len([a for a in x if '-商业' in a]) != 0:
@@ -445,24 +518,29 @@ class MyBot(Wechaty):
                             jqInsurance = 'false' if [a for a in x if '-交强' in a] else 'true'
                             if len([a for a in x if '-车损' in a]) != 0:
                                 csInsurance = 'false'
-                            elif len([a for a in x if '车损' in a and '-' not in a]) != 0:
-                                csInsurance = get_number(a for a in x if '车损' in a)
+                            elif len([a for a in x if
+                                      '车损' in a and '-' not in a and '：' not in a and ':' not in a]) != 0:
+                                csInsurance = get_number(a for a in x if '车损' in a and '：' not in a and ':' not in a)
                             else:
                                 csInsurance = 'true'
-                            szInsurance = '100' if len([a for a in x if '三者' in a]) == 0 else get_number(
-                                str([a for a in x if '三者' in a]))
-                            driver = '1' if len([a for a in x if '司机' in a]) == 0 else get_number(
-                                str([a for a in x if '司机' in a]))
-                            passenger = '1' if len([a for a in x if '乘客' in a]) == 0 else get_number(
-                                str([a for a in x if '乘客' in a]))
-                            accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
-                                str([a for a in x if '意外' in a]))
+                            szInsurance = '100' if len(
+                                [a for a in x if '三者' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                            driver = '1' if len(
+                                [a for a in x if '司机' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                            passenger = '1' if len(
+                                [a for a in x if '乘客' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
+                            accident = None if len(
+                                [a for a in x if '意外' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '意外' in a and '：' not in a and ':' not in a]))
                     elif len(x) == 7:
                         jqInsurance = 'true'
                         csInsurance = 'true'
-                        szInsurance = get_number(str([a for a in x if '三者' in a]))
-                        driver = get_number(str([a for a in x if '司机' in a]))
-                        passenger = get_number(str([a for a in x if '乘客' in a]))
+                        szInsurance = get_number(str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                        driver = get_number(str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                        passenger = get_number(str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
                         accident = None
                     else:
                         await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
@@ -480,24 +558,29 @@ class MyBot(Wechaty):
                             jqInsurance = 'false' if [a for a in x if '-交强' in a] else 'true'
                             if len([a for a in x if '-车损' in a]) != 0:
                                 csInsurance = 'false'
-                            elif len([a for a in x if '车损' in a and '-' not in a]) != 0:
-                                csInsurance = get_number(a for a in x if '车损' in a)
+                            elif len([a for a in x if
+                                      '车损' in a and '-' not in a and '：' not in a and ':' not in a]) != 0:
+                                csInsurance = get_number(a for a in x if '车损' in a and '：' not in a and ':' not in a)
                             else:
                                 csInsurance = 'true'
-                            szInsurance = '150' if len([a for a in x if '三者' in a]) == 0 else get_number(
-                                str([a for a in x if '三者' in a]))
-                            driver = '5' if len([a for a in x if '司机' in a]) == 0 else get_number(
-                                str([a for a in x if '司机' in a]))
-                            passenger = '5' if len([a for a in x if '乘客' in a]) == 0 else get_number(
-                                str([a for a in x if '乘客' in a]))
-                            accident = None if len([a for a in x if '意外' in a]) == 0 else get_number(
-                                str([a for a in x if '意外' in a]))
+                            szInsurance = '150' if len(
+                                [a for a in x if '三者' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                            driver = '5' if len(
+                                [a for a in x if '司机' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                            passenger = '5' if len(
+                                [a for a in x if '乘客' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
+                            accident = None if len(
+                                [a for a in x if '意外' in a and '：' not in a and ':' not in a]) == 0 else get_number(
+                                str([a for a in x if '意外' in a and '：' not in a and ':' not in a]))
                     elif len(x) == 7:
                         jqInsurance = 'true'
                         csInsurance = 'true'
-                        szInsurance = get_number(str([a for a in x if '三者' in a]))
-                        driver = get_number(str([a for a in x if '司机' in a]))
-                        passenger = get_number(str([a for a in x if '乘客' in a]))
+                        szInsurance = get_number(str([a for a in x if '三者' in a and '：' not in a and ':' not in a]))
+                        driver = get_number(str([a for a in x if '司机' in a and '：' not in a and ':' not in a]))
+                        passenger = get_number(str([a for a in x if '乘客' in a and '：' not in a and ':' not in a]))
                         accident = None
                     else:
                         await conversation.say('@' + msg.talker().name + " 未识别到指令，请核实后重新发送!")
@@ -520,7 +603,16 @@ class MyBot(Wechaty):
                         'passenger': passenger,
                         'accident': None if accident is None else '*'.join(accident),
                         'phone': phone,
-                        'appKey': "X08ASKYS",
+                        'address': address,
+                        'insrncBgnTm': validity_period,
+                        'owner': car_name,
+                        'idNumber': id_card,
+                        'vinCode': frame_id,
+                        'licensePlateNumber': car_licence,
+                        'engineNumber': engine_id,
+                        'registrationDate': first_date,
+                        'model': model,
+                        'appKey': appKey,
                         'nickname': msg.talker().name
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
@@ -544,7 +636,7 @@ class MyBot(Wechaty):
                     multipart_encoder = MultipartEncoder(
                         fields={
                             'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
+                            'appKey': appKey
                         },
                         boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                     )
@@ -622,7 +714,7 @@ class MyBot(Wechaty):
                         'path': '/img/robotOrder',
                         'storageServer': 'FASTDFS',
                         'file': (str(int(time.time())) + '.jpg', BytesIO(hd_file_box.stream), 'image/jpeg'),
-                        'appKey': "X08ASKYS"
+                        'appKey': appKey
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -640,10 +732,7 @@ class MyBot(Wechaty):
                 assert isinstance(talker, Contact)
 
         elif "21121012651@chatroom" == room_id:
-            if '@AI出单' in text and '查单' in text:
-                pass
-
-            elif '@AI出单' in text and '批量出单' in text:
+            if '@AI出单' in text and '批量出单' in text:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
@@ -653,9 +742,10 @@ class MyBot(Wechaty):
                     fields={
                         'roomId': room_id,
                         'contactId': contact_id,
-                        'operator': msg.talker().name,
+                        'operator': '5',
+                        'nickname': msg.talker().name,
                         'cmdName': text,
-                        'appKey': "X08ASKYS"
+                        'appKey': appKey
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -669,44 +759,34 @@ class MyBot(Wechaty):
                 if res_dict['errorCode'] != "":
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
                     return
-                num = 0
-                second = sleep_time(0, 0, 5)
-                while True:
-                    time.sleep(second)
-                    url = ip_js + 'api/RobotApi/pullPolicy.do'
-                    multipart_encoder = MultipartEncoder(
-                        fields={
-                            'uuid': res_dict['data'],
-                            'appKey': "X08ASKYS"
-                        },
-                        boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
-                    )
-                    headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
-                    try:
-                        response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
-                    except:
-                        if num == 6:
-                            await conversation.say('@' + msg.talker().name + " 抱歉，连接已断开，未查询到用户数据!")
-                            return
-                    response_dict = json.loads(response.text)
-                    if response_dict['errorCode'] != "":
-                        await conversation.say('@' + msg.talker().name + response_dict['errorMsg'])
-                        return
-                    if num == 6:
-                        await conversation.say('@' + msg.talker().name + " 抱歉，连接已断开，未查询到用户数据!")
-                        return
-                    elif response_dict['success']:
-                        try:
-                            file_box = FileBox.from_url(
-                                response_dict['data'],
-                                name='policy.xlsx')
-                            await conversation.say(file_box)
-                            await conversation.say('@' + msg.talker().name + ' 完成批量出单，请查收结果!')
-                            return
-                        except:
-                            await conversation.say('@' + msg.talker().name + " 批量出单失败，请手动操作!")
-                            return
-                    num = num + 1
+
+            elif '@AI出单' in text and '批量查单' in text:
+                conversation: Union[
+                    Room, Contact] = from_contact if room is None else room
+                await conversation.ready()
+                await conversation.say('@' + msg.talker().name + " 收到指令,努力处理中请稍后!")
+                url = ip_js + 'api/RobotApi/jsxtPolicy.do'
+                multipart_encoder = MultipartEncoder(
+                    fields={
+                        'roomId': room_id,
+                        'contactId': contact_id,
+                        'nickname': msg.talker().name,
+                        'operator': '6',
+                        'cmdName': text,
+                        'appKey': appKey
+                    },
+                    boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
+                )
+                headers = {'Referer': url, 'Content-Type': multipart_encoder.content_type}
+                try:
+                    response = requests.post(url, data=multipart_encoder, headers=headers, timeout=30)
+                except:
+                    await conversation.say('@' + msg.talker().name + "  抱歉，连接已断开，未查询到用户数据!")
+                    return
+                res_dict = json.loads(response.text)
+                if res_dict['errorCode'] != "":
+                    await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
+                    return
 
             elif msg_type == MessageType.MESSAGE_TYPE_IMAGE:
                 conversation: Union[
@@ -723,7 +803,7 @@ class MyBot(Wechaty):
                         'path': '/img/robotOrder',
                         'storageServer': 'FASTDFS',
                         'file': (str(int(time.time())) + '.jpg', BytesIO(hd_file_box.stream), 'image/jpeg'),
-                        'appKey': "X08ASKYS"
+                        'appKey': appKey
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -733,7 +813,8 @@ class MyBot(Wechaty):
                 if not res_dict['success']:
                     await conversation.say('@' + msg.talker().name + res_dict['errorMsg'])
 
-            elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT, MessageType.MESSAGE_TYPE_VIDEO]:
+            elif msg_type in [MessageType.MESSAGE_TYPE_AUDIO, MessageType.MESSAGE_TYPE_ATTACHMENT,
+                              MessageType.MESSAGE_TYPE_VIDEO]:
                 conversation: Union[
                     Room, Contact] = from_contact if room is None else room
                 await conversation.ready()
@@ -753,7 +834,7 @@ class MyBot(Wechaty):
                                 "xlsx") else '.xls', BytesIO(file_box.stream),
                             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' if file_box.name.endswith(
                                 "xlsx") else 'application/vnd.ms-excel'),
-                        'appKey': "X08ASKYS"
+                        'appKey': appKey
                     },
                     boundary='-----------------------------' + str(random.randint(1e28, 1e29 - 1))
                 )
@@ -828,7 +909,7 @@ class MyBot(Wechaty):
             await invitee.ready()
             names.append(invitee.name)
 
-        await room.say(f'welcome {",".join(names)} to the wechaty group !')
+        await room.say(f'welcome {",".join(names)} to the group !')
 
 
 license_plate = "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼]" \

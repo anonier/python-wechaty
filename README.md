@@ -290,21 +290,3 @@ Project created, publish a empty module `wechaty` on PyPI.
 ```md
 [![Wechaty in Python](https://img.shields.io/badge/Wechaty-Python-blue)](https://github.com/wechaty/python-wechaty)
 ```
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/wechaty/python-wechaty.svg)](https://starchart.cc/wechaty/python-wechaty)
-
-## Contributors
-
-<a href="https://github.com/wechaty/python-wechaty/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=wechaty/python-wechaty" />
-</a>
-
-Made with [contrib.rocks](https://contrib.rocks).
-
-## Support
-
-Thanks the following supported Software. 
-
-[![test image size](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg?_gl=1*1lb7oaa*_ga*MjE5ODE2MzAwLjE2MzYxODMyNTE.*_ga_V0XZL7QHEB*MTY0MTI2NzU5OS41LjEuMTY0MTI2NzY3OC4w&_ga=2.157122558.411488113.1641267600-219816300.1636183251)](https://jb.gg/OpenSourceSupport)

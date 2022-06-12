@@ -308,18 +308,3 @@ Made with [contrib.rocks](https://contrib.rocks).
 Thanks the following supported Software. 
 
 [![test image size](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg?_gl=1*1lb7oaa*_ga*MjE5ODE2MzAwLjE2MzYxODMyNTE.*_ga_V0XZL7QHEB*MTY0MTI2NzU5OS41LjEuMTY0MTI2NzY3OC4w&_ga=2.157122558.411488113.1641267600-219816300.1636183251)](https://jb.gg/OpenSourceSupport)
-
-## Committers
-
-1. [@huangaszaq](https://github.com/huangaszaq) -  Chunhong HUANG (黄纯洪)
-
-## Creators
-
-- [@wj-Mcat](https://github.com/wj-Mcat) - Jingjing WU (吴京京)
-- [@huan](https://github.com/huan) - ([李卓桓](http://linkedin.com/in/zixia)) zixia@zixia.net
-
-## Copyright & License
-
-- Code & Docs © 2018 Wechaty Contributors <https://github.com/wechaty>
-- Code released under the Apache-2.0 License
-- Docs released under Creative Commons

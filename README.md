@@ -1,5 +1,5 @@
 <!-- markdownlint-disable MD033 -->
-# python-wechaty 
+# python-wechaty
 fork from https://github.com/wechaty/python-wechaty
 
 ![Python Wechaty](./docs/img/getting-started/python-wechaty.png)
@@ -55,11 +55,11 @@ from wechaty import Wechaty
 
 import asyncio
 async def main():
-    bot = Wechaty()
-    bot.on('scan', lambda status, qrcode, data: print('Scan QR Code to login: {}\nhttps://wechaty.js.org/qrcode/{}'.format(status, qrcode)))
-    bot.on('login', lambda user: print('User {} logged in'.format(user)))
-    bot.on('message', lambda message: print('Message: {}'.format(message)))
-    await bot.start()
+  bot = Wechaty()
+  bot.on('scan', lambda status, qrcode, data: print('Scan QR Code to login: {}\nhttps://wechaty.js.org/qrcode/{}'.format(status, qrcode)))
+  bot.on('login', lambda user: print('User {} logged in'.format(user)))
+  bot.on('message', lambda message: print('Message: {}'.format(message)))
+  await bot.start()
 
 asyncio.run(main())
 ```
@@ -126,95 +126,95 @@ If you are interested in the translation and want to look at how it works, it wi
 ### Wechaty Internal Modules
 
 1. [ ] Class Wechaty @wj-mCat
-    - TS SLOC(1160): <https://github.com/wechaty/wechaty/blob/master/src/wechaty.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(1160): <https://github.com/wechaty/wechaty/blob/master/src/wechaty.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Contact
-    - TS SLOC(804): <https://github.com/wechaty/wechaty/blob/master/src/user/contact.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(804): <https://github.com/wechaty/wechaty/blob/master/src/user/contact.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class ContactSelf
-    - TS SLOC(199): <https://github.com/wechaty/wechaty/blob/master/src/user/contact-self.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(199): <https://github.com/wechaty/wechaty/blob/master/src/user/contact-self.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Message
-    - TS SLOC(1054): <https://github.com/wechaty/wechaty/blob/master/src/user/message.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(1054): <https://github.com/wechaty/wechaty/blob/master/src/user/message.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Room
-    - TS SLOC(1194): <https://github.com/wechaty/wechaty/blob/master/src/user/room.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(1194): <https://github.com/wechaty/wechaty/blob/master/src/user/room.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Image @wj-mCat
-    - TS SLOC(60): <https://github.com/wechaty/wechaty/blob/master/src/user/image.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(60): <https://github.com/wechaty/wechaty/blob/master/src/user/image.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [x] Class Accessory @huan
-    - TS SLOC(179): <https://github.com/wechaty/wechaty/blob/master/src/accessory.ts>
-    - [x] Code
-    - [x] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(179): <https://github.com/wechaty/wechaty/blob/master/src/accessory.ts>
+  - [x] Code
+  - [x] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Config @wj-mCat
-    - TS SLOC(187): <https://github.com/wechaty/wechaty/blob/master/src/config.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(187): <https://github.com/wechaty/wechaty/blob/master/src/config.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Favorite
-    - TS SLOC(52): <https://github.com/wechaty/wechaty/blob/master/src/user/favorite.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(52): <https://github.com/wechaty/wechaty/blob/master/src/user/favorite.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Friendship
-    - TS SLOC(417): <https://github.com/wechaty/wechaty/blob/master/src/user/friendship.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(417): <https://github.com/wechaty/wechaty/blob/master/src/user/friendship.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class MiniProgram
-    - TS SLOC(70): <https://github.com/wechaty/wechaty/blob/master/src/user/mini-program.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(70): <https://github.com/wechaty/wechaty/blob/master/src/user/mini-program.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class RoomInvitation
-    - TS SLOC(317): <https://github.com/wechaty/wechaty/blob/master/src/user/room-invitation.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(317): <https://github.com/wechaty/wechaty/blob/master/src/user/room-invitation.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class Tag
-    - TS SLOC(190): <https://github.com/wechaty/wechaty/blob/master/src/user/tag.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(190): <https://github.com/wechaty/wechaty/blob/master/src/user/tag.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class UrlLink
-    - TS SLOC(107): <https://github.com/wechaty/wechaty/blob/master/src/user/url-link.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(107): <https://github.com/wechaty/wechaty/blob/master/src/user/url-link.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 
 ### Wechaty External Modules
 
 1. [ ] Class FileBox
-    - TS SLOC(638): <https://github.com/huan/file-box/blob/master/src/file-box.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(638): <https://github.com/huan/file-box/blob/master/src/file-box.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class MemoryCard
-    - TS SLOC(376): <https://github.com/huan/memory-card/blob/master/src/memory-card.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(376): <https://github.com/huan/memory-card/blob/master/src/memory-card.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class WechatyPuppet
-    - TS SLOC(1115): <https://github.com/wechaty/wechaty-puppet/blob/master/src/puppet.ts>
-    - [ ] Code
-    - [ ] Unit Tests
-    - [ ] Documentation
+  - TS SLOC(1115): <https://github.com/wechaty/wechaty-puppet/blob/master/src/puppet.ts>
+  - [ ] Code
+  - [ ] Unit Tests
+  - [ ] Documentation
 1. [ ] Class WechatyPuppetHostie
-    - TS SLOC(909): <https://github.com/wechaty/wechaty-puppet-service/blob/master/src/client/puppet-service.ts>
+  - TS SLOC(909): <https://github.com/wechaty/wechaty-puppet-service/blob/master/src/client/puppet-service.ts>
 
 ## Usage
 
@@ -265,10 +265,10 @@ Welcome [@wj-Mcat](https://github.com/wj-Mcat) for joining the project! [#4](htt
 
 1. Starting translate TypeScript of Wechaty to Python
 1. DevOps Setup
-    1. Type Checking: mypy & pytype
-    1. Unit Testing: pytest
-    1. Linting: pylint, pycodestyle, and flake8
-    1. CI/CD: GitHub Actions
+  1. Type Checking: mypy & pytype
+  1. Unit Testing: pytest
+  1. Linting: pylint, pycodestyle, and flake8
+  1. CI/CD: GitHub Actions
 1. Publish to PyPI automatically after the tests passed.
 
 ### v0.0.1 (Aug 25, 2018)
@@ -290,3 +290,36 @@ Project created, publish a empty module `wechaty` on PyPI.
 ```md
 [![Wechaty in Python](https://img.shields.io/badge/Wechaty-Python-blue)](https://github.com/wechaty/python-wechaty)
 ```
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/wechaty/python-wechaty.svg)](https://starchart.cc/wechaty/python-wechaty)
+
+## Contributors
+
+<a href="https://github.com/wechaty/python-wechaty/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=wechaty/python-wechaty" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
+## Support
+
+Thanks the following supported Software.
+
+[![test image size](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg?_gl=1*1lb7oaa*_ga*MjE5ODE2MzAwLjE2MzYxODMyNTE.*_ga_V0XZL7QHEB*MTY0MTI2NzU5OS41LjEuMTY0MTI2NzY3OC4w&_ga=2.157122558.411488113.1641267600-219816300.1636183251)](https://jb.gg/OpenSourceSupport)
+
+## Committers
+
+1. [@huangaszaq](https://github.com/huangaszaq) -  Chunhong HUANG (黄纯洪)
+
+## Creators
+
+- [@wj-Mcat](https://github.com/wj-Mcat) - Jingjing WU (吴京京)
+- [@huan](https://github.com/huan) - ([李卓桓](http://linkedin.com/in/zixia)) zixia@zixia.net
+
+## Copyright & License
+
+- Code & Docs © 2018 Wechaty Contributors <https://github.com/wechaty>
+- Code released under the Apache-2.0 License
+- Docs released under Creative Commons
